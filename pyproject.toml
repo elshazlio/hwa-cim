@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hwa-cim"
+version = "0.1.0"
+description = "Hardware-aware training pipeline for C-2C SRAM CiM (MNIST micro-MLP)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "torch>=2.0",
+    "torchvision>=0.15",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+gui = ["streamlit>=1.33", "plotly>=5.18"]
+
+[project.scripts]
+hwa-dashboard = "hwa_gui.entry:main"
+hwa-train-baseline = "hwa_cim.train_baseline:main"
+hwa-eval-noisy = "hwa_cim.evaluate:main_noisy"
+hwa-sweep-phase2 = "hwa_cim.evaluate:main_sweep_gamma"
+hwa-train-hwa = "hwa_cim.train_hwa:main"
+hwa-sweep-hwa = "hwa_cim.train_hwa:main_sweep"
+hwa-train-distill = "hwa_cim.train_distill:main"
+hwa-plot-thesis = "hwa_cim.plots:main_thesis_chart"
+hwa-plot-parasitic = "hwa_cim.plots:main_parasitic"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

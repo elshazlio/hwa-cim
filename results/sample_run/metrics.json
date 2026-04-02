@@ -1,0 +1,7 @@
+{
+  "fp32_test_accuracy": 0.9654,
+  "int8_ptq_test_accuracy": 0.9652,
+  "parity_linear_c2c_max_abs_error": 0.02168545126914978,
+  "epochs": 3,
+  "seed": 42
+}
