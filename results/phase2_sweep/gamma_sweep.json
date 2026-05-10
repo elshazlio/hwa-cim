@@ -1,0 +1,32 @@
+{
+  "rows": [
+    {
+      "gamma": 0.0,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.01,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.02,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.04,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.06,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.08,
+      "accuracy_seed0": 0.9394
+    },
+    {
+      "gamma": 0.1,
+      "accuracy_seed0": 0.9394
+    }
+  ]
+}

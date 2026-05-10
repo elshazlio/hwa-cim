@@ -1,0 +1,9 @@
+{
+  "gamma": 0.02,
+  "alpha_clip": 3.0,
+  "final_clean_accuracy": 0.9723,
+  "final_noisy_mean": 0.9723,
+  "final_noisy_std": 0.0,
+  "noise_mode": "synthetic",
+  "noise_profile": null
+}

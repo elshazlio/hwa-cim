@@ -8,3 +8,5 @@ data/
 *.egg-info/
 dist/
 build/
+results/.mplconfig/
+results/.dashboard_last.log

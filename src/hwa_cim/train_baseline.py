@@ -1,4 +1,4 @@
-"""Phase 1: FP32 baseline, INT8 PTQ eval, parity check."""
+"""Phase 1: FP32 baseline, INT4 PTQ eval, parity check."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 
 from hwa_cim.data import get_mnist_loaders
-from hwa_cim.evaluate import accuracy, accuracy_int8, parity_linear_vs_c2c
+from hwa_cim.evaluate import accuracy, accuracy_int4, parity_linear_vs_c2c
 from hwa_cim.models import MicroMLP
 from hwa_cim.utils_io import save_checkpoint, save_json
 
@@ -46,7 +46,7 @@ def run_baseline(
     seed: int = 42,
     device: str = "cpu",
 ) -> dict:
-    """Phase 1 baseline train + INT8 eval + parity. Returns metrics dict."""
+    """Phase 1 baseline train + INT4 eval + parity. Returns metrics dict."""
     out_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(seed)
     dev = torch.device(device)
@@ -69,12 +69,12 @@ def run_baseline(
     assert best_state is not None
     model.load_state_dict(best_state)
     fp32_acc = accuracy(model, test_loader, dev)
-    int8_acc = accuracy_int8(model, test_loader, dev)
+    int4_acc = accuracy_int4(model, test_loader, dev)
     par = parity_linear_vs_c2c(dev)
 
     metrics = {
         "fp32_test_accuracy": fp32_acc,
-        "int8_ptq_test_accuracy": int8_acc,
+        "int4_ptq_test_accuracy": int4_acc,
         "parity_linear_c2c_max_abs_error": par,
         "epochs": epochs,
         "seed": seed,

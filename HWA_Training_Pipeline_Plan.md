@@ -31,16 +31,16 @@ Building the software infrastructure now means that when the hardware noise prof
 
 1. **Build a micro-MLP in PyTorch**
   - Architecture: 784 → 128 → 64 → 10 (or similar small topology)
-  - Why this size: it must be realistically mappable onto an 8×8 or 16×16 SRAM CiM array. A 784-input layer already implies tiling across multiple array invocations, which connects directly to your inter-array scaling research question.
+  - Why this size: it must be realistically mappable onto a 4×4 SRAM CiM array. Each 4×4 tile computes a partial MAC of 4 inputs against 4-bit weights per column; MNIST's 784-input layer requires tiling across multiple tile invocations.
   - Use standard training: SGD or Adam, cross-entropy loss, 10–20 epochs.
-2. **Quantize weights to 8-bit integers**
-  - Your C-2C ladder implements 8-bit weights. The model must operate at this precision.
-  - Implement post-training quantization (PTQ) first: clamp weights to [−128, 127], scale activations to 8-bit unsigned.
-  - Record accuracy drop from FP32 → INT8. This is your "quantization-only" baseline.
+2. **Quantize weights to 4-bit integers**
+  - Your C-2C ladder has 4 rows; each row stores 1 binary weight bit. Effective weight precision per column = 4 bits. Input activations are driven by a 4-bit DAC, one per row. The model must operate at this precision end-to-end.
+  - Implement post-training quantization (PTQ) first: clamp weights to [−8, 7] (signed INT4), scale activations to 4-bit unsigned [0, 15].
+  - Record accuracy drop from FP32 → INT4. This is your "quantization-only" baseline.
 3. **Build a software MAC simulator**
-  - Write a Python function `c2c_mac(weights_8bit, activations_8bit)` that computes the ideal (noiseless) output of your C-2C ladder.
-  - This is the mathematical model from Wang's equation: `V_OUT = V_REF * Σ(b_i * 2^(i-k))`
-  - For an array: `OA = (1/m) * Σ_j Σ_i IA_j * W_{j,n,i} * 2^(i-k)` — passive charge-sharing averaging.
+  - Write a Python function `c2c_mac(weights_4bit, activations_4bit)` that computes the ideal (noiseless) output of your C-2C ladder.
+  - This is the mathematical model from Wang's equation: `V_OUT = V_REF * Σ(b_i * 2^(i-k))` where k=4 (4-bit precision).
+  - For a 4×4 array: `OA = (1/4) * Σ_j Σ_i IA_j * W_{j,n,i} * 2^(i-4)` — passive charge-sharing averaging across 4 rows.
   - Validate: feed the same inputs through PyTorch's `nn.Linear` and through your MAC simulator. The outputs must match exactly (within floating-point tolerance) for the ideal case.
 
 ### Verifiable Deliverables
@@ -49,9 +49,9 @@ Building the software infrastructure now means that when the hardware noise prof
 | #   | Deliverable               | Pass Criteria                                              |
 | --- | ------------------------- | ---------------------------------------------------------- |
 | 1.1 | Trained FP32 micro-MLP    | ≥97% MNIST test accuracy                                   |
-| 1.2 | INT8 quantized model      | Accuracy recorded, expected ~95–97%                        |
-| 1.3 | Software MAC simulator    | Output matches `nn.Linear` within 1e-6 for all test inputs |
-| 1.4 | Baseline comparison table | FP32 vs. INT8 accuracy logged                              |
+| 1.2 | INT4 quantized model      | Accuracy recorded; expected drop from FP32 baseline        |
+| 1.3 | Software MAC simulator    | Output matches `nn.Linear` within 1e-6 for all test inputs; validated at 4-bit input/weight precision |
+| 1.4 | Baseline comparison table | FP32 vs. INT4 accuracy logged                              |
 
 
 ---
@@ -63,26 +63,20 @@ Building the software infrastructure now means that when the hardware noise prof
 
 ### Tasks
 
-1. **Model parasitic capacitance error (now PDK-grounded)**
-  - Your thesis identifies ~40% bottom-plate parasitic in 65nm MIM caps.
-  - **NEW: Use actual UMC 65nm INTERCAP data to refine this estimate.** From the G-04 INTERCAP document (G-4M variant, SP/MIM/LOW_K):
-    - Low-K dielectric (k = 2.9) for M1–M6, FSG (k = 3.7) for M7+
-    - Etch stop layers between metals have k = 5 to 7
-    - MIM cap bottom plate (MMCBP) thickness = 0.110 µm, top plate (MMCTP) = 0.060 µm
-    - Metal7 thickness = 0.360 µm (±15%), Metal8 = 0.360 µm
-    - Interlayer dielectric thicknesses are fully specified (IMD7A = 0.06 µm, IMD7B = 0.26 µm, IMD7C = 0.36 µm, etc.)
-  - With these numbers, you can compute Cp/C_unit analytically: bottom-plate parasitic ≈ (ε₀ × k_ILD × A_plate) / t_ILD_to_ground. This gives a physics-based starting point instead of a guess.
-  - Implement a `C2CLadderWithParasitics` class that takes a `parasitic_ratio` parameter and computes the distorted transfer curve.
-  - Sweep `parasitic_ratio` from 0% to 50% and plot the transfer curve nonlinearity (gaps/overlaps as described in Wang Fig. 11).
-  - **Mark the PDK-derived parasitic ratio on the sweep plot** — this is the "operating point" your hardware will likely sit near.
+1. **Model parasitic capacitance error (MOM cap, PDK-grounded)**
+  - The C-2C ladder uses MOMCAPS_SY_MMKF symmetric MOM finger capacitors from the UMC 65nm FDK. Characterized values: C ≈ 15.1 fF (unit cap), 2C ≈ 30.2 fF (series cap). These are NOT MIM caps — all previous references to MIM bottom-plate parasitics are inapplicable.
+  - MOM cap parasitics are dominated by fringe capacitance to adjacent metal fingers and substrate coupling, not a bottom-plate stack. Parasitic ratio for MOM is process-geometry dependent; use a sweep range of 0–20% (tighter than MIM's 25–35%).
+  - Implement a `C2CLadderWithParasitics` class that takes a `parasitic_ratio` parameter and C_unit=15.1e-15, C_series=30.2e-15 as defaults. Compute the distorted transfer curve.
+  - Sweep `parasitic_ratio` from 0% to 20% and plot the transfer curve nonlinearity (gaps/overlaps as described in Wang Fig. 11).
+  - Mark the nominal operating point on the plot. Exact parasitic σ pending G-05 MOMCAP SPICE model — use placeholder until that document is available.
 2. **Model capacitor mismatch (random noise)**
   - Per the Analog Foundation Models methodology, add Gaussian noise to the weights during the forward pass.
   - Implement the noise injection from equation (5) of the AFM paper: `W_noisy = W + (γ_weight · max(|W|) + β_weight · |W|) · τ` where `τ ~ N(0, I)`
   - Start with additive Gaussian noise (the AFM paper found additive performs comparably to affine for their use case): `W_noisy = W + γ_weight · max(|W|) · τ`
   - Use `γ_weight = 0.02` as the starting point (the optimal value from AFM paper's sweep in their Fig. 5).
 3. **Model ADC quantization at the output**
-  - Your SAR-ADC is 8-bit. The accumulated analog voltage gets quantized to 8 bits at readout.
-  - Add output quantization to the forward pass after the MAC.
+  - Your SAR-ADC is 4-bit. The accumulated analog voltage gets quantized to 4 bits (16 levels) at readout.
+  - Add 4-bit output quantization to the forward pass after the MAC. Full-scale range maps to [0, 15].
 4. **Evaluate noisy inference (no retraining yet)**
   - Take your Phase 1 quantized model.
   - Run inference 10× with different random seeds (critical per the AFM paper methodology).
@@ -96,7 +90,7 @@ Building the software infrastructure now means that when the hardware noise prof
 | --- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | 2.1 | Parasitic transfer curve sweep     | Plot showing nonlinearity vs. parasitic ratio. Matches Wang Fig. 11 behavior qualitatively                               |
 | 2.2 | Noise injection layer              | Drops into PyTorch model as a custom `nn.Module`. Forward pass adds noise, backward pass uses straight-through estimator |
-| 2.3 | Noisy inference results (10 seeds) | Table: mean accuracy ± std under γ = 0.02 noise. Expected ~5–15% drop from INT8 baseline                                 |
+| 2.3 | Noisy inference results (10 seeds) | Table: mean accuracy ± std under γ = 0.02 noise. Expected ~5–15% drop from INT4 baseline                                 |
 | 2.4 | Noise sensitivity sweep            | Plot: accuracy vs. γ_weight from 0.00 to 0.10. Reproduces the general shape of AFM paper Fig. 5                          |
 
 
@@ -125,7 +119,7 @@ Building the software infrastructure now means that when the hardware noise prof
   - Find the Pareto-optimal point: highest clean accuracy that maintains robustness under noise.
 4. **Generate the thesis comparison chart**
   - This is explicitly on your checklist: "Accuracy without Noise Training (Low) vs. Accuracy with Noise Training (High)"
-  - Three bars: (a) FP32 baseline, (b) INT8 + noise (no HWA training), (c) INT8 + noise (with HWA training)
+  - Three bars: (a) FP32 baseline, (b) INT4 + noise (no HWA training), (c) INT4 + noise (with HWA training)
   - The gap between (b) and (c) is your proof that HWA training works for your architecture.
 
 ### Verifiable Deliverables
@@ -134,7 +128,7 @@ Building the software infrastructure now means that when the hardware noise prof
 | #   | Deliverable                  | Pass Criteria                                                                 |
 | --- | ---------------------------- | ----------------------------------------------------------------------------- |
 | 3.1 | Weight clipping ablation     | Table showing clean vs. noisy accuracy for each α value                       |
-| 3.2 | Noise-aware trained model    | Noisy accuracy within 2–3% of clean INT8 baseline (vs. ~10% drop without HWA) |
+| 3.2 | Noise-aware trained model    | Noisy accuracy within 2–3% of clean INT4 baseline (vs. ~10% drop without HWA) |
 | 3.3 | Hyperparameter sweep results | 9-cell table (γ × α) with mean ± std accuracy                                 |
 | 3.4 | Thesis comparison bar chart  | Three-bar chart matching the checklist deliverable. Publishable quality       |
 
@@ -179,11 +173,19 @@ Building the software infrastructure now means that when the hardware noise prof
 **Duration:** ~3–5 days (once data arrives)
 **Goal:** Replace placeholder noise with the actual noise profile extracted from Monte Carlo simulations on your post-layout extracted 65nm macro.
 
+### Layout scope — decision log (fill in when frozen)
+
+**Pending:** Lay out either **(A)** the SRAM unit cell with its MAC slice, or **(B)** the full **4×4 SRAM MAC array** — pick one as the first extraction target; note the choice here once decided.
+
+**Handoff to the training/software track:** The PyTorch pipeline does **not** need GDSII or SKILL by itself. What unblocks Phase 5 is a **Monte Carlo summary file** (typically **CSV**) matching the schema below (`input_code`, `ideal_output`, `mean_output`, `sigma`, optional `CSNR_dB`), exported after analog MC on the **PEX/post-layout extracted** netlist of whichever block you laid out.
+
+**PEX netlists:** Essential inside **Virtuoso/Spectre** as the extracted netlist used for MC — archive revision-controlled exports with your thesis supplementary material if possible. This repo **does not ingest raw PEX** today unless we add custom parsers; simulation-derived **CSV** remains the integration surface.
+
 ### Inputs Required From Hardware Track
 
 1. **Monte Carlo simulation results** from extracted layout:
   - Run N = 100–1000 Monte Carlo iterations
-  - For each iteration: sweep all 256 input codes (8-bit)
+  - For each iteration: sweep all 16 input codes (4-bit)
   - Record output voltage for each code per iteration
 2. **Extract noise profile:**
   - For each output code: compute μ(V_out) and σ(V_out)
@@ -225,8 +227,6 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4
                                     ┌────────────────┘
                                     │
                            [SRAM Cell Fix]
-                                    │
-                           [9T Extension]
                                     │
                            [Array Assembly]
                                     │
@@ -307,13 +307,11 @@ The following PDK documents have been reviewed and mapped to specific thesis tra
 - Access transistors at ~1.5× → W ≈ 0.12 µm (120 nm)
 - Pull-down NMOS at ~2× → W ≈ 0.16–0.20 µm (160–200 nm)
 - All at Lmin = 60 nm for the 6T storage core.
-- For the 9T compute port: larger widths are acceptable since those transistors drive the C-2C ladder and need low on-resistance for clean charge transfer.
 
 **Vt flavor selection:**
 
 - SP_RVT is the safe default for 6T SRAM: balanced Vt gives good read SNM without excessive leakage.
 - SP_HVT could be considered for the 6T storage core to reduce standby leakage (SRAM weights are stationary during inference), at the cost of slower write speed — but write speed is not critical since weight loading happens infrequently vs. compute cycles.
-- The compute port transistors (3T) may benefit from SP_LVT for faster charge transfer, but this introduces Vt-mixing complexity in layout. Start with all-RVT unless simulation shows a bottleneck.
 
 ### G-04 INTERCAP — Key Extracted Parameters
 
@@ -398,7 +396,9 @@ Wang's original design (22nm FinFET) used MOM (metal-oxide-metal) capacitors for
 - **MIM (MIMCAPS_20F_MM):** Higher density (~~20 fF/µm²), dedicated mask layer, good matching, but incurs the bottom-plate parasitic discussed above (~~25–35%). Requires the MIM metal option in the process (G-4M variant).
 - **MOM (MOMCAPS_SY_MMKF):** No extra mask, uses standard metal fingers, lower parasitic to substrate, but lower density and matching depends on lithographic precision. Can be placed on any metal layer.
 
-Your thesis already commits to MIM caps. The `MIMCAPS_20F_MM` PCell is almost certainly your target device. The "20F" likely means ~20 fF/µm² capacitance density, which means:
+The design uses MOM caps, not MIM. The target PCell is `MOMCAPS_SY_MMKF` (symmetric MOM finger capacitor). Characterized values: C ≈ 15.1 fF, 2C ≈ 30.2 fF. All MIM-specific parasitic calculations in Phase 2 and the dielectric stack analysis in Appendix A are superseded by MOM parasitics. The G-05 MOMCAP SPICE model (not G-05 MIMCAP) is the outstanding missing document for Phase 2 calibration.
+
+The "20F" likely means ~20 fF/µm² capacitance density, which means:
 
 - For a unit capacitor C = 50 fF, you need an area of 50/20 = 2.5 µm²
 - For 2C = 100 fF (the serial cap), you need 5.0 µm²
@@ -426,8 +426,8 @@ The uploaded documents cover the process overview (G-01), interconnect parasitic
 | ----------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | G-02 EDR (Electrical Design Rules)  | Min/max MIM cap dimensions, spacing rules, ESD rules, latch-up rules               | Farah, Armia (layout)                                            |
 | G-03 TLR (Topological Layout Rules) | DRC-clean layout rules for transistors, caps, wells, contacts                      | Farah, Armia (layout)                                            |
-| G-05 SPICE Models (MIMCAP)          | Actual MIM cap density (fF/µm²), mismatch σ, temperature coefficients              | Omar (Phase 2 calibration), Abanoub/John/Mariam (ADC/DAC sizing) |
+| G-05 SPICE Models (MOMCAP)          | Actual MOM cap value (fF), mismatch σ vs. finger count, temperature coefficients — MOMCAPS_SY_MMKF specifically | Omar (Phase 2 calibration), Abanoub/John/Mariam (ADC/DAC sizing) |
 | G-05 SPICE Models (MOSFET)          | Transistor SPICE models for simulation — you already have these loaded in Virtuoso | Already in use                                                   |
 
 
-The G-05 MIMCAP SPICE model is the single most important missing document for calibrating the Phase 2 noise model. It will give you the exact mismatch statistics (σ_ΔC/C vs. area) that replace the generic Gaussian noise placeholder. If you can find `G-05SP-MIXED_MODE/RFCMOS65N-MIM/LOW_K-SPICE/SPECTRE/CAPACITOR` in your PDK distribution, that's the file.
+The G-05 MOMCAP SPICE model is the single most important missing document for calibrating the Phase 2 noise model. It will give you the exact mismatch statistics (σ_ΔC/C vs. area) that replace the generic Gaussian noise placeholder. If you can find `G-05SP-MIXED_MODE/RFCMOS65N-MIM/LOW_K-SPICE/SPECTRE/CAPACITOR` in your PDK distribution, that's the file.

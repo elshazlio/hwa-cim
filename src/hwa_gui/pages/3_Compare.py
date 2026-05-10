@@ -47,4 +47,4 @@ if rows:
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-st.caption("Tip: include Phase 1 baseline + Phase 3 HWA to compare `fp32_test_accuracy` vs `final_noisy_mean`.")
+st.caption("Tip: include Phase 1 baseline + Phase 3 HWA to compare `fp32_test_accuracy` vs `final_noisy_mean` (Phase 1 also logs `int4_ptq_test_accuracy`).")

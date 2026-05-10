@@ -13,8 +13,8 @@ from hwa_cim.c2c import ladder_nonlinearity_metric
 from hwa_cim.utils_io import load_json
 
 
-def plot_parasitic_sweep(out_path: Path, pdk_marker: float = 0.30) -> None:
-    ratios = np.linspace(0.0, 0.5, 51)
+def plot_parasitic_sweep(out_path: Path, pdk_marker: float = 0.10) -> None:
+    ratios = np.linspace(0.0, 0.2, 41)
     metrics = [ladder_nonlinearity_metric(float(r)) for r in ratios]
     plt.figure(figsize=(7, 4))
     plt.plot(ratios * 100, metrics, label="Max |error| vs ideal ramp")
@@ -46,13 +46,13 @@ def plot_gamma_sweep_csv(csv_path: Path, out_path: Path) -> None:
 
 def plot_thesis_three_bar(
     fp32_acc: float,
-    int8_noisy_acc: float,
+    int4_noisy_acc: float,
     hwa_noisy_acc: float,
     out_path: Path,
     title: str = "MNIST: HWA training recovers accuracy under noise",
 ) -> None:
-    labels = ["FP32\n(baseline)", "INT8 + noise\n(no HWA)", "INT8 + noise\n(HWA trained)"]
-    vals = [fp32_acc * 100, int8_noisy_acc * 100, hwa_noisy_acc * 100]
+    labels = ["FP32\n(baseline)", "INT4 + noise\n(no HWA)", "INT4 + noise\n(HWA trained)"]
+    vals = [fp32_acc * 100, int4_noisy_acc * 100, hwa_noisy_acc * 100]
     colors = ["#4C72B0", "#DD8452", "#55A868"]
     plt.figure(figsize=(7, 4.5))
     x = np.arange(len(labels))
@@ -72,7 +72,7 @@ def plot_thesis_three_bar(
 
 def run_parasitic_plot(
     out: Path = Path("results/figures/parasitic_sweep.png"),
-    pdk_marker: float = 0.30,
+    pdk_marker: float = 0.10,
 ) -> Path:
     """Write parasitic sweep figure; returns output path."""
     plot_parasitic_sweep(out, pdk_marker=pdk_marker)
@@ -83,7 +83,7 @@ def run_parasitic_plot(
 def main_parasitic() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--out", type=Path, default=Path("results/figures/parasitic_sweep.png"))
-    p.add_argument("--pdk-marker", type=float, default=0.30)
+    p.add_argument("--pdk-marker", type=float, default=0.10)
     args = p.parse_args()
     run_parasitic_plot(out=args.out, pdk_marker=args.pdk_marker)
 
@@ -100,15 +100,19 @@ def run_thesis_chart(
 
     if noisy_eval_json and noisy_eval_json.exists():
         noisy_m = load_json(noisy_eval_json)
-        int8_noisy = float(noisy_m["mean_accuracy"])
+        int4_noisy = float(noisy_m["mean_accuracy"])
     else:
-        int8_noisy = float(base_m.get("int8_noisy_proxy", base_m["int8_ptq_test_accuracy"]) * 0.92)
+        proxy = base_m.get("int4_noisy_proxy", base_m.get("int8_noisy_proxy"))
+        if proxy is None:
+            ptq = base_m.get("int4_ptq_test_accuracy", base_m.get("int8_ptq_test_accuracy"))
+            proxy = float(ptq) * 0.92
+        int4_noisy = float(proxy)
 
     hwa_dir = hwa_checkpoint.parent
     hwa_m = load_json(hwa_dir / "metrics.json")
     hwa_noisy = float(hwa_m["final_noisy_mean"])
 
-    plot_thesis_three_bar(fp32, int8_noisy, hwa_noisy, out)
+    plot_thesis_three_bar(fp32, int4_noisy, hwa_noisy, out)
     return out
 
 

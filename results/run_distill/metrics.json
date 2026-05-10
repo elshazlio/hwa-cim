@@ -1,0 +1,6 @@
+{
+  "teacher_accuracy": 0.9837,
+  "student_clean": 0.9722,
+  "student_noisy_mean": 0.9722000000000002,
+  "student_noisy_std": 2.220446049250313e-16
+}

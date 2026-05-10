@@ -1,57 +1,64 @@
-"""Symmetric INT8 / activation quantization helpers and fake-quant with STE."""
+"""INT4 weights (−8…7), unsigned 4-bit activations [0, 15], fake-quant with STE."""
 
 from __future__ import annotations
 
 import torch
-import torch.nn.functional as F
 
 
-def symmetric_quantize_int8(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-    """Per-tensor symmetric int8 quantization. Returns (q_int8, scale scalar)."""
-    qmax = 127.0
+def symmetric_quantize_int4(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """Per-tensor symmetric signed INT4. Returns (q int8 in [-8, 7], scale scalar)."""
+    qmax = 7.0
     amax = x.detach().abs().amax().clamp(min=1e-8)
     scale = amax / qmax
-    q = (x / scale).round().clamp(-qmax, qmax).to(torch.int8)
+    q = (x / scale).round().clamp(-8, 7).to(torch.int8)
     return q, scale
 
 
-def symmetric_quantize_uint8(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-    """Per-tensor unsigned 8-bit [0, 255] for activations (after shift to nonnegative if needed)."""
+def quantize_uint4(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Per-tensor unsigned 4-bit [0, 15] for activations (MNIST / post-ReLU).
+    If x goes negative, shifts so the tensor is nonnegative before quantizing.
+    Returns (q int8, scale, shift) with x ≈ q * scale + shift elementwise in-range.
+    """
     x_min = x.detach().amin()
     x_max = x.detach().amax()
     if x_min < 0:
-        x = x - x_min
+        x_work = x - x_min
         shift = x_min
     else:
+        x_work = x
         shift = torch.zeros((), device=x.device, dtype=x.dtype)
     rng = (x_max - x_min).clamp(min=1e-8)
-    scale = rng / 255.0
-    q = (x / scale).round().clamp(0, 255).to(torch.uint8)
-    return q, scale
+    scale = rng / 15.0
+    q = (x_work / scale).round().clamp(0, 15).to(torch.int8)
+    return q, scale, shift
 
 
-def fake_quantize_int8_ste(x: torch.Tensor) -> torch.Tensor:
-    """Straight-through estimator to int8 grid."""
-    qmax = 127.0
+def fake_quantize_int4_ste(x: torch.Tensor) -> torch.Tensor:
+    """Straight-through estimator to signed INT4 grid."""
+    qmax = 7.0
     amax = x.detach().abs().amax().clamp(min=1e-8)
     scale = amax / qmax
-    x_q = (x / scale).round().clamp(-qmax, qmax)
-    return x + (x_q - x).detach()
+    x_q = (x / scale).round().clamp(-8, 7)
+    return x + (x_q * scale - x).detach()
 
 
-def dequantize_int8_matmul(
-    x_int8: torch.Tensor,
-    w_int8: torch.Tensor,
+def dequantize_int4_matmul(
+    x_q: torch.Tensor,
+    w_q: torch.Tensor,
     scale_x: torch.Tensor,
     scale_w: torch.Tensor,
     bias: torch.Tensor | None = None,
+    shift_x: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """
-    y = x @ w^T with int8 MAC + per-tensor scales (matches nn.Linear if quant scales match).
-    x_int8: [B, in], w_int8: [out, in]
+    y = x @ w^T with INT4 MAC + per-tensor scales; optional activation shift from uint4 path.
+    x_q: [B, in], w_q: [out, in], shift_x scalar (same device/dtype as x).
     """
-    acc = torch.matmul(x_int8.to(torch.int32), w_int8.to(torch.int32).T)
+    acc = torch.matmul(x_q.to(torch.int32), w_q.to(torch.int32).T)
     y = acc.to(torch.float32) * (scale_x * scale_w)
+    if shift_x is not None:
+        y = y + shift_x * scale_w * w_q.to(torch.float32).sum(dim=1)
     if bias is not None:
         y = y + bias
     return y

@@ -7,10 +7,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from hwa_cim.noise import additive_weight_noise, additive_weight_noise_sigma
-from hwa_cim.quantization import clip_weights_by_std, fake_quantize_int8_ste
+from hwa_cim.quantization import clip_weights_by_std, fake_quantize_int4_ste
 
 
-def adc_quantize_ste(y: torch.Tensor, bits: int = 8) -> torch.Tensor:
+def adc_quantize_ste(y: torch.Tensor, bits: int = 4) -> torch.Tensor:
     """Uniform ADC quantization with STE; per-tensor dynamic range."""
     levels = float(2**bits - 1)
     y_min = y.detach().amin()
@@ -24,7 +24,7 @@ def adc_quantize_ste(y: torch.Tensor, bits: int = 8) -> torch.Tensor:
 
 class NoisyQuantLinear(nn.Module):
     """
-    Linear with optional weight clipping, fake int8 quant, AFM-style noise, optional ADC on output.
+    Linear with optional weight clipping, fake INT4 quant, AFM-style noise, optional ADC on output.
     Training: STE through quant + ADC; noise active if gamma > 0 or csv sigma.
     """
 
@@ -37,7 +37,7 @@ class NoisyQuantLinear(nn.Module):
         gamma: float = 0.02,
         alpha_clip: float = 3.0,
         use_adc: bool = True,
-        adc_bits: int = 8,
+        adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
     ) -> None:
@@ -56,7 +56,7 @@ class NoisyQuantLinear(nn.Module):
         w = self.linear.weight
         b = self.linear.bias
         w = clip_weights_by_std(w, self.alpha_clip)
-        w_q = fake_quantize_int8_ste(w)
+        w_q = fake_quantize_int4_ste(w)
         if self.training and (
             self.gamma > 0
             or (self.sigma_global is not None and self.sigma_global > 0)

@@ -92,7 +92,7 @@ def run_hwa_train(
         gamma=gamma,
         alpha_clip=alpha,
         use_adc=True,
-        adc_bits=8,
+        adc_bits=4,
         noise_mode=noise_mode,
         sigma_global=sigma_global,
     ).to(dev)

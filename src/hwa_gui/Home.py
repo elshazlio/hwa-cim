@@ -29,7 +29,7 @@ Welcome. Use the sidebar to **run** training/eval jobs, **browse** `results/`, *
 open **interactive charts**, and **validate** Phase-5 noise CSVs.
 
 **Pipeline (thesis workflow)**  
-1. **Baseline** — FP32 + INT8 PTQ + MAC parity  
+1. **Baseline** — FP32 + INT4 PTQ + MAC parity  
 2. **Noisy eval / gamma sweep** — Phase 2 on a baseline checkpoint  
 3. **HWA train** (optional sweep) — noise-aware training  
 4. **Distill** — teacher–student  

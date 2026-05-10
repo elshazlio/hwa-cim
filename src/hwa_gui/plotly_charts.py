@@ -16,10 +16,10 @@ ACCENT = "#38bdf8"
 MUTED = "#94a3b8"
 
 
-def figure_parasitic_sweep(pdk_marker: float = 0.30) -> go.Figure:
+def figure_parasitic_sweep(pdk_marker: float = 0.10) -> go.Figure:
     from hwa_cim.c2c import ladder_nonlinearity_metric
 
-    ratios = np.linspace(0.0, 0.5, 51)
+    ratios = np.linspace(0.0, 0.2, 41)
     metrics = [ladder_nonlinearity_metric(float(r)) for r in ratios]
     fig = go.Figure()
     fig.add_trace(
@@ -84,15 +84,19 @@ def figure_thesis_three_bar(
     fp32 = float(base_m["fp32_test_accuracy"])
     if noisy_eval_json and noisy_eval_json.exists():
         noisy_m = load_json(noisy_eval_json)
-        int8_noisy = float(noisy_m["mean_accuracy"])
+        int4_noisy = float(noisy_m["mean_accuracy"])
     else:
-        int8_noisy = float(base_m.get("int8_noisy_proxy", base_m["int8_ptq_test_accuracy"]) * 0.92)
+        proxy = base_m.get("int4_noisy_proxy", base_m.get("int8_noisy_proxy"))
+        if proxy is None:
+            ptq = base_m.get("int4_ptq_test_accuracy", base_m.get("int8_ptq_test_accuracy"))
+            proxy = float(ptq) * 0.92
+        int4_noisy = float(proxy)
     hwa_dir = hwa_checkpoint.parent
     hwa_m = load_json(hwa_dir / "metrics.json")
     hwa_noisy = float(hwa_m["final_noisy_mean"])
 
-    labels = ["FP32 baseline", "INT8 + noise", "INT8 + noise (HWA)"]
-    vals = [fp32 * 100, int8_noisy * 100, hwa_noisy * 100]
+    labels = ["FP32 baseline", "INT4 + noise", "INT4 + noise (HWA)"]
+    vals = [fp32 * 100, int4_noisy * 100, hwa_noisy * 100]
     colors = ["#4C72B0", "#DD8452", "#55A868"]
     fig = go.Figure(
         data=[

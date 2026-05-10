@@ -1,4 +1,4 @@
-"""Evaluation: accuracy, INT8 forward, noisy inference, gamma sweep."""
+"""Evaluation: accuracy, INT4 forward, noisy inference, gamma sweep."""
 
 from __future__ import annotations
 
@@ -10,11 +10,12 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from hwa_cim.c2c import c2c_mac
 from hwa_cim.data import get_mnist_loaders
 from hwa_cim.models import MicroMLP, NoisyMicroMLP
-from hwa_cim.quantization import symmetric_quantize_int8
+from hwa_cim.quantization import quantize_uint4, symmetric_quantize_int4
 from hwa_cim.utils_io import save_json
 
 
@@ -33,8 +34,8 @@ def accuracy(model: nn.Module, loader: torch.utils.data.DataLoader, device: torc
 
 
 @torch.no_grad()
-def forward_int8_mlp(model: MicroMLP, x: torch.Tensor) -> torch.Tensor:
-    """Layerwise INT8 MAC + ReLU (PTQ-style)."""
+def forward_int4_mlp(model: MicroMLP, x: torch.Tensor) -> torch.Tensor:
+    """Layerwise INT4 weight + uint4 activation MAC + ReLU (PTQ-style)."""
     x = model.flatten(x)
     for i, (fc, relu) in enumerate(
         [
@@ -42,24 +43,24 @@ def forward_int8_mlp(model: MicroMLP, x: torch.Tensor) -> torch.Tensor:
             (model.fc2, model.relu2),
         ]
     ):
-        w_q, sw = symmetric_quantize_int8(fc.weight)
-        x_q, sx = symmetric_quantize_int8(x)
-        x = c2c_mac(w_q, x_q, sw, sx, fc.bias)
+        w_q, sw = symmetric_quantize_int4(fc.weight)
+        x_q, sx, shift = quantize_uint4(x)
+        x = c2c_mac(w_q, x_q, sw, sx, fc.bias, shift_x=shift)
         x = relu(x)
-    w3_q, sw3 = symmetric_quantize_int8(model.fc3.weight)
-    x_q, sx = symmetric_quantize_int8(x)
-    logits = c2c_mac(w3_q, x_q, sw3, sx, model.fc3.bias)
+    w3_q, sw3 = symmetric_quantize_int4(model.fc3.weight)
+    x_q, sx, shift = quantize_uint4(x)
+    logits = c2c_mac(w3_q, x_q, sw3, sx, model.fc3.bias, shift_x=shift)
     return logits
 
 
 @torch.no_grad()
-def accuracy_int8(model: MicroMLP, loader: torch.utils.data.DataLoader, device: torch.device) -> float:
+def accuracy_int4(model: MicroMLP, loader: torch.utils.data.DataLoader, device: torch.device) -> float:
     model.eval()
     correct = 0
     total = 0
     for x, y in loader:
         x, y = x.to(device), y.to(device)
-        logits = forward_int8_mlp(model, x)
+        logits = forward_int4_mlp(model, x)
         pred = logits.argmax(dim=-1)
         correct += (pred == y).sum().item()
         total += y.numel()
@@ -77,14 +78,16 @@ def copy_mlp_to_noisy(src: MicroMLP, dst: NoisyMicroMLP) -> None:
 
 @torch.no_grad()
 def parity_linear_vs_c2c(device: torch.device = torch.device("cpu")) -> float:
-    """Max error between nn.Linear and int8 c2c_mac on random data."""
+    """Max error between dequant linear and c2c_mac (same quant grids), should be ~float noise."""
     torch.manual_seed(0)
     lin = nn.Linear(128, 64).to(device)
     x = torch.randn(32, 128, device=device)
-    y_ref = lin(x)
-    w_q, sw = symmetric_quantize_int8(lin.weight)
-    x_q, sx = symmetric_quantize_int8(x)
-    y_mac = c2c_mac(w_q, x_q, sw, sx, lin.bias)
+    w_q, sw = symmetric_quantize_int4(lin.weight)
+    x_q, sx, shift = quantize_uint4(x)
+    y_mac = c2c_mac(w_q, x_q, sw, sx, lin.bias, shift_x=shift)
+    x_dq = x_q.to(torch.float32) * sx + shift
+    w_dq = w_q.to(torch.float32) * sw
+    y_ref = F.linear(x_dq, w_dq, lin.bias)
     return float((y_ref - y_mac).abs().max().item())
 
 
@@ -96,7 +99,7 @@ def run_noisy_eval(
     device: str = "cpu",
     out: Path | None = None,
 ) -> dict:
-    """Phase 2 noisy inference on INT8 baseline. Writes JSON and returns payload."""
+    """Phase 2 noisy inference on INT4-quantized-path baseline. Writes JSON and returns payload."""
     device_t = torch.device(device)
     _, test_loader = get_mnist_loaders(data_dir, batch_size=256)
     base = MicroMLP().to(device_t)
@@ -106,6 +109,7 @@ def run_noisy_eval(
         gamma=gamma,
         alpha_clip=3.0,
         use_adc=True,
+        adc_bits=4,
     ).to(device_t)
     copy_mlp_to_noisy(base, noisy)
     noisy.train()  # noise active
@@ -143,7 +147,7 @@ def run_sweep_gamma(
     gammas = [0.0, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10]
     rows = []
     for g in gammas:
-        noisy = NoisyMicroMLP(gamma=g, alpha_clip=3.0, use_adc=True).to(device_t)
+        noisy = NoisyMicroMLP(gamma=g, alpha_clip=3.0, use_adc=True, adc_bits=4).to(device_t)
         copy_mlp_to_noisy(base, noisy)
         noisy.train()
         torch.manual_seed(0)
@@ -159,7 +163,7 @@ def run_sweep_gamma(
 
 
 def main_noisy() -> None:
-    p = argparse.ArgumentParser(description="Noisy inference on INT8 baseline (Phase 2)")
+    p = argparse.ArgumentParser(description="Noisy inference on INT4 baseline (Phase 2)")
     p.add_argument("--checkpoint", type=Path, required=True)
     p.add_argument("--data-dir", type=Path, default=Path("data"))
     p.add_argument("--gamma", type=float, default=0.02)

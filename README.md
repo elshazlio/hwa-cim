@@ -1,6 +1,6 @@
 # HWA-CiM: Hardware-Aware Training (MNIST)
 
-Implements the pipeline described in `HWA_Training_Pipeline_Plan.md`: FP32/INT8 baseline, C-2C MAC parity, parasitic/noise models, HWA training, distillation, and a Phase-5 CSV hook for Monte Carlo noise profiles.
+Implements the pipeline described in `HWA_Training_Pipeline_Plan.md`: FP32/INT4 baseline, C-2C MAC parity, parasitic/noise models (MOM ladder defaults), HWA training, distillation, and a Phase-5 CSV hook for Monte Carlo noise profiles.
 
 ## Setup
 

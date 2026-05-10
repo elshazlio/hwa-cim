@@ -29,7 +29,7 @@ class HWAConfig:
 
     gamma_weight: float = 0.02
     alpha_clip: float = 3.0
-    adc_bits: int = 8
+    adc_bits: int = 4
     use_adc: bool = True
     parasitic_ratio: float = 0.0  # 0 = ideal ladder behavior in forward
     noise_mode: str = "synthetic"  # synthetic | csv

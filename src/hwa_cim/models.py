@@ -38,7 +38,7 @@ class NoisyMicroMLP(nn.Module):
         gamma: float = 0.02,
         alpha_clip: float = 3.0,
         use_adc: bool = True,
-        adc_bits: int = 8,
+        adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
     ) -> None:
