@@ -1,15 +1,44 @@
 # HWA-CiM: Hardware-Aware Training (MNIST)
 
-Implements the pipeline described in `HWA_Training_Pipeline_Plan.md`: FP32/INT4 baseline, C-2C MAC parity, parasitic/noise models (MOM ladder defaults), HWA training, distillation, and a Phase-5 CSV hook for Monte Carlo noise profiles.
+Software pipeline for **charge-domain SRAM compute-in-memory** research aligned with **Analog Foundation Models** (AFM)–style training [Rasch et al., 2025]: a small **micro-MLP** on **MNIST**, **INT4** weights, **unsigned 4-bit activations**, **4-bit ADC** modeling per linear layer, and **synthetic Gaussian weight noise** (γ · max|W|) until **Phase 5**, when a **Monte Carlo CSV** from Cadence can drive HWA training.
+
+**Detailed methodology and thesis checklist:** [`HWA_Training_Pipeline_Plan.md`](HWA_Training_Pipeline_Plan.md)  
+**Streamlit dashboard notes:** [`GUI_RUN.md`](GUI_RUN.md)
+
+---
+
+## Status (software)
+
+| Phase | Scope | In repo |
+| ----- | ----- | ------- |
+| **1** | FP32 train, INT4 PTQ eval, `c2c_mac` parity vs `nn.Linear` | Yes (`hwa-train-baseline`) |
+| **2** | NoisyQuantLinear + γ noise (train mode), ADC STE, parasitic ladder plots | Yes (`hwa-eval-noisy`, `hwa-sweep-phase2`, `hwa-plot-parasitic`) |
+| **3** | HWA training (noise + clipping + STE) | Yes (`hwa-train-hwa`, `hwa-sweep-hwa`) |
+| **4** | Teacher–student distillation + noisy student | Yes (`hwa-train-distill`) |
+| **5** | Real noise profile from **PEX + Monte Carlo** → CSV → `--noise-mode csv` | Hook implemented; **waiting on hardware MC export** |
+
+Sample checkpoints, `metrics.json`, sweeps, and figures are under **`results/`** (committed as examples; re-run CLI commands to regenerate on your machine).
+
+---
 
 ## Requirements
 
-- **Python 3.10–3.12** (matches `requires-python` and stable PyTorch wheels).
-- **MNIST** downloads automatically on first train run into `data/` (ignored by git).
+- **Python 3.10–3.13** (`requires-python` in `pyproject.toml` is `>=3.10,<3.14`).
+- **PyTorch** (CPU or CUDA); MNIST is downloaded on first training run into **`data/`** (gitignored).
+
+Install **editable** with optional **`dev`** (pytest) and **`gui`** (Streamlit + Plotly):
+
+```text
+pip install -e ".[dev,gui]"
+```
+
+Minimal install without dashboard: `pip install -e ".[dev]"`.
+
+---
 
 ## Setup — macOS / Linux
 
-From the repository root (folder that contains `pyproject.toml`):
+From the repository root (directory that contains `pyproject.toml`):
 
 ```bash
 cd "/path/to/Thesis HW Codesign"
@@ -18,9 +47,9 @@ source .venv/bin/activate
 pip install -e ".[dev,gui]"
 ```
 
-## Setup — Windows (PowerShell)
+---
 
-From the repository root:
+## Setup — Windows (PowerShell)
 
 ```powershell
 cd "C:\path\to\Thesis HW Codesign"
@@ -29,53 +58,105 @@ py -3.12 -m venv .venv
 pip install -e ".[dev,gui]"
 ```
 
-If execution policy blocks activation, run once: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`.
+If activation is blocked: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`.
 
-**CMD:** use `\.venv\Scripts\activate.bat` instead of `Activate.ps1`.
+**CMD:** `\.venv\Scripts\activate.bat`
 
-## Run — dashboard (optional GUI)
+---
 
-With the venv **activated**, from the repo root:
+## Quick start (recommended order)
+
+From repo root with venv activated:
+
+```bash
+hwa-train-baseline --data-dir data --out-dir results/run_baseline
+hwa-eval-noisy --checkpoint results/run_baseline/best.pt --data-dir data --out results/run_baseline/noisy_eval.json --gamma 0.02 --seeds 10
+hwa-train-hwa --data-dir data --out-dir results/run_hwa --gamma 0.02 --alpha 3.0
+hwa-plot-thesis --baseline-dir results/run_baseline --hwa-checkpoint results/run_hwa/best.pt --noisy-eval-json results/run_baseline/noisy_eval.json --out results/figures/thesis_bars.png
+```
+
+Optional: **teacher + student** distillation — `hwa-train-distill --out-dir results/run_distill`.
+
+Use **`--device cuda`** on any command that trains or evaluates if a GPU is available.
+
+---
+
+## Dashboard (optional)
 
 ```bash
 hwa-dashboard
 ```
 
-Same command on Windows after PowerShell activation. Streamlit prints a local URL (usually `http://localhost:8501`).
-
-Equivalent without the console script:
+Opens the Streamlit lab UI (typically `http://localhost:8501`). Equivalent:
 
 ```bash
 python -m streamlit run src/hwa_gui/Home.py
 ```
 
-## Commands (CLI)
+---
 
-| Phase | Command |
-|-------|---------|
-| 1 Baseline | `hwa-train-baseline --out-dir results/run_baseline` |
-| 2 Noisy eval | `hwa-eval-noisy --checkpoint results/run_baseline/best.pt --gamma 0.02 --seeds 10` |
-| 2 Gamma sweep | `hwa-sweep-phase2 --checkpoint results/run_baseline/best.pt` |
-| 3 HWA train | `hwa-train-hwa --out-dir results/run_hwa --gamma 0.02 --alpha 3.0` |
-| 3 Sweep | `hwa-sweep-hwa --out-dir results/sweep_hwa` |
-| 4 Distill | `hwa-train-distill --out-dir results/run_distill --teacher-epochs 30` |
-| Thesis chart | `hwa-plot-thesis --baseline-dir results/run_baseline --hwa-checkpoint results/run_hwa/best.pt --noisy-eval-json results/run_baseline/noisy_eval.json --out results/figures/thesis_bars.png` |
-| Parasitic sweep | `hwa-plot-parasitic --out results/figures/parasitic_sweep.png` |
+## CLI reference
 
-Run `hwa-eval-noisy` on the Phase 1 checkpoint first to produce `noisy_eval.json` for the middle bar.
+Console scripts are defined in `pyproject.toml`; after install they are on `PATH` inside the venv.
+
+| Phase | Command | Notes |
+| ----- | ------- | ----- |
+| **1** Baseline | `hwa-train-baseline --out-dir results/run_baseline` | Writes `best.pt`, `metrics.json` (`fp32_test_accuracy`, `int4_ptq_test_accuracy`, parity error). |
+| **2** Noisy eval | `hwa-eval-noisy --checkpoint …/best.pt --out …/noisy_eval.json` | Middle-bar input for thesis plot. |
+| **2** Γ sweep | `hwa-sweep-phase2 --checkpoint …/best.pt --out-dir results/phase2_sweep` | CSV/JSON under `out-dir`. |
+| **3** HWA | `hwa-train-hwa --out-dir results/run_hwa --gamma 0.02 --alpha 3.0` | Best noisy-validation checkpoint. |
+| **3** Grid | `hwa-sweep-hwa --out-dir results/sweep_hwa` | γ × α grid (long run). |
+| **4** Distill | `hwa-train-distill --out-dir results/run_distill` | Teacher + noisy student. |
+| **Fig** Thesis bars | `hwa-plot-thesis --baseline-dir … --hwa-checkpoint …/best.pt [--noisy-eval-json …]` | Uses `int4_ptq_test_accuracy` with fallback to legacy `int8_ptq_test_accuracy`. |
+| **Fig** Parasitic | `hwa-plot-parasitic --out results/figures/parasitic_sweep.png` | MOM-oriented sweep **0–20%** (`--pdk-marker` optional). |
+
+**Phase 5 (hardware CSV):**
+
+```bash
+hwa-train-hwa --noise-mode csv --noise-profile path/to/mc_profile.csv --out-dir results/run_hwa_mc ...
+```
+
+The loader expects columns such as `input_code`, `ideal_output`, `mean_output`, `sigma` (see `src/hwa_cim/noise.py`). Training currently summarizes **`sigma`** via **`sigma_mean`** for injection scale — tighten this when richer per-code statistics are needed.
+
+---
 
 ## Outputs
 
-- Checkpoints, `metrics.json`, CSV summaries under `results/`
-- Figures under `results/figures/`
-- Phase 5: CSV columns `input_code,ideal_output,mean_output,sigma` (optional `CSNR_dB`); use `hwa-train-hwa --noise-mode csv --noise-profile path/to/profile.csv`
+| Path | Contents |
+| ---- | -------- |
+| `results/run_baseline/` | FP32 checkpoint, `metrics.json`, optional `noisy_eval.json` |
+| `results/run_hwa/` | HWA checkpoint, `metrics.json` |
+| `results/run_distill/` | Teacher/student checkpoints, `metrics.json` |
+| `results/phase2_sweep/` | `gamma_sweep.csv`, `.json` |
+| `results/figures/` | `thesis_bars.png`, `parasitic_sweep.png` |
+
+If Matplotlib warns about a non-writable config dir (e.g. CI), set:
+
+```bash
+export MPLCONFIGDIR="$PWD/results/.mplconfig"
+mkdir -p "$MPLCONFIGDIR"
+```
+
+(`results/.mplconfig` is gitignored.)
+
+---
+
+## Hardware track (short)
+
+Layout targets **UMC 65nm** SRAM CiM / **C-2C** ladder with **MOMCAPS_SY_MMKF** defaults in software. **PEX** netlists are for **Virtuoso/Spectre MC** — this repo consumes **simulation-derived tables** (CSV), not raw PEX text, unless you add tooling. See **Phase 5** and **layout scope** in `HWA_Training_Pipeline_Plan.md`.
+
+---
 
 ## Tests
-
-With venv activated and repo root as cwd:
 
 ```bash
 pytest
 ```
 
-Or: `python -m pytest` (macOS, Linux, or Windows).
+(`python -m pytest` works on all platforms; `pythonpath` is set in `pyproject.toml`.)
+
+---
+
+## License
+
+MIT — see `pyproject.toml`.
