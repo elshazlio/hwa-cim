@@ -41,26 +41,34 @@ class NoisyMicroMLP(nn.Module):
         adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
+        hardware_aware: bool = False,
+        g_eff_sparse: float | None = None,
+        g_eff_dense: float | None = None,
+        offset_dense_v: float | None = None,
+        population_sparse_max: int | None = None,
+        population_dense_min: int | None = None,
     ) -> None:
         super().__init__()
+        kw = dict(
+            gamma=gamma,
+            alpha_clip=alpha_clip,
+            use_adc=use_adc,
+            adc_bits=adc_bits,
+            noise_mode=noise_mode,
+            sigma_global=sigma_global,
+            hardware_aware=hardware_aware,
+            g_eff_sparse=g_eff_sparse,
+            g_eff_dense=g_eff_dense,
+            offset_dense_v=offset_dense_v,
+            population_sparse_max=population_sparse_max,
+            population_dense_min=population_dense_min,
+        )
         self.flatten = nn.Flatten()
-        self.fc1 = NoisyQuantLinear(
-            784, hidden1, True,
-            gamma=gamma, alpha_clip=alpha_clip, use_adc=use_adc, adc_bits=adc_bits,
-            noise_mode=noise_mode, sigma_global=sigma_global,
-        )
+        self.fc1 = NoisyQuantLinear(784, hidden1, True, **kw)
         self.relu1 = nn.ReLU(inplace=True)
-        self.fc2 = NoisyQuantLinear(
-            hidden1, hidden2, True,
-            gamma=gamma, alpha_clip=alpha_clip, use_adc=use_adc, adc_bits=adc_bits,
-            noise_mode=noise_mode, sigma_global=sigma_global,
-        )
+        self.fc2 = NoisyQuantLinear(hidden1, hidden2, True, **kw)
         self.relu2 = nn.ReLU(inplace=True)
-        self.fc3 = NoisyQuantLinear(
-            hidden2, num_classes, True,
-            gamma=gamma, alpha_clip=alpha_clip, use_adc=use_adc, adc_bits=adc_bits,
-            noise_mode=noise_mode, sigma_global=sigma_global,
-        )
+        self.fc3 = NoisyQuantLinear(hidden2, num_classes, True, **kw)
 
     def forward(self, x):
         x = self.flatten(x)

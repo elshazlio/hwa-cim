@@ -1,0 +1,36 @@
+---
+description: Agent Decision Records (AgDR) — document significant technical choices for this thesis / hwa-cim repo
+alwaysApply: true
+---
+
+# Agent Decision Records (AgDR)
+
+This project uses [Agent Decision Records](https://www.me2resh.com/blog/agent-decision-records) (AgDR): lightweight, versioned records of **non-obvious technical decisions** so humans and future agents know *why* something was chosen.
+
+## When you MUST write an AgDR (stop and document first)
+
+Before merging or finishing work, add a new file under `docs/agdr/` if you:
+
+- Change **training / evaluation semantics** (e.g. new metrics, defaults that alter Phase 1–5 meaning).
+- Introduce or move **hardware calibration** (gains, offsets, noise profiles, CSV schema).
+- Add dependencies, change **Python version bounds**, or alter **CLI contracts** (`hwa-*` entrypoints).
+- Choose among **multiple real approaches** (not trivial renames or obvious bugfixes).
+
+If you catch yourself saying “we’ll use X” or comparing “X vs Y” for anything in `src/hwa_cim/`, `pyproject.toml`, or thesis pipeline docs — **write the AgDR first**, then implement.
+
+## Where and how
+
+| Item | Convention |
+|------|----------------|
+| Location | `docs/agdr/AgDR-{NNNN}-{short-kebab-title}.md` |
+| Next ID | One greater than the highest existing `AgDR-NNNN` in `docs/agdr/` |
+| Template | Copy from [docs/agdr/TEMPLATE.md](docs/agdr/TEMPLATE.md) |
+| Status | `proposed` until merged; then `executed` (or `superseded` with pointer to replacement) |
+
+Fill **Context**, **Options Considered** (table), **Decision**, **Consequences**, and the **Y-statement** at the top. Keep the record honest about tradeoffs (e.g. schematic vs layout, ideal vs hardware-shaped metrics).
+
+## Project scope hint
+
+**hwa-cim** is a hardware-aware training pipeline for a C-2C SRAM compute-in-memory macro (MNIST micro-MLP, Phases 1–5). Decisions that affect comparability of thesis numbers or the hardware–software boundary belong in AgDR.
+
+Do **not** edit the plan file in `.cursor/plans/` when documenting decisions — copy the substance into `docs/agdr/` if it was a real decision.

@@ -2,8 +2,11 @@
 
 Software pipeline for **charge-domain SRAM compute-in-memory** research aligned with **Analog Foundation Models** (AFM)–style training [Rasch et al., 2025]: a small **micro-MLP** on **MNIST**, **INT4** weights, **unsigned 4-bit activations**, **4-bit ADC** modeling per linear layer, and **synthetic Gaussian weight noise** (γ · max|W|) until **Phase 5**, when a **Monte Carlo CSV** from Cadence can drive HWA training.
 
-**Detailed methodology and thesis checklist:** [`HWA_Training_Pipeline_Plan.md`](HWA_Training_Pipeline_Plan.md)  
-**Streamlit dashboard notes:** [`GUI_RUN.md`](GUI_RUN.md)
+The stack also supports an **optional schematic-style MAC model**: population-dependent **effective gain** and a **dense-regime offset** on top of ideal INT4 multiply–accumulate (`c2c_mac(..., hardware_aware=True)`), wired into **HWA training** by default (`hwa-train-hwa` / `hwa-train-distill`) while **Phase 2 noisy eval** stays on the legacy path unless you opt in. See **`docs/agdr/AgDR-0001-hardware-aware-mac-calibration.md`** for the decision record.
+
+**Detailed methodology and thesis checklist:** [`background_info/HWA_Training_Pipeline_Plan.md`](background_info/HWA_Training_Pipeline_Plan.md)  
+**Streamlit lab (GUI) — install, tour, partial runs:** [`GUI_RUN.md`](GUI_RUN.md)  
+**Agent Decision Records (architecture / calibration choices):** [`docs/agdr/README.md`](docs/agdr/README.md)
 
 ---
 
@@ -11,11 +14,13 @@ Software pipeline for **charge-domain SRAM compute-in-memory** research aligned 
 
 | Phase | Scope | In repo |
 | ----- | ----- | ------- |
-| **1** | FP32 train, INT4 PTQ eval, `c2c_mac` parity vs `nn.Linear` | Yes (`hwa-train-baseline`) |
+| **1** | FP32 train, INT4 PTQ eval (**ideal + hardware-shaped**), `c2c_mac` parity vs `nn.Linear` (ideal path only) | Yes (`hwa-train-baseline`) |
 | **2** | NoisyQuantLinear + γ noise (train mode), ADC STE, parasitic ladder plots | Yes (`hwa-eval-noisy`, `hwa-sweep-phase2`, `hwa-plot-parasitic`) |
-| **3** | HWA training (noise + clipping + STE) | Yes (`hwa-train-hwa`, `hwa-sweep-hwa`) |
-| **4** | Teacher–student distillation + noisy student | Yes (`hwa-train-distill`) |
+| **3** | HWA training (noise + clipping + STE); **hardware-aware forward on by default** (`--no-hardware-aware` to match pre-change behavior) | Yes (`hwa-train-hwa`, `hwa-sweep-hwa`) |
+| **4** | Teacher–student distillation + noisy student (same `--no-hardware-aware` flag) | Yes (`hwa-train-distill`) |
 | **5** | Real noise profile from **PEX + Monte Carlo** → CSV → `--noise-mode csv` | Hook implemented; **waiting on hardware MC export** |
+
+The same phase order is exposed as tabs on the Streamlit **Run** page; see [`GUI_RUN.md`](GUI_RUN.md).
 
 Sample checkpoints, `metrics.json`, sweeps, and figures are under **`results/`** (committed as examples; re-run CLI commands to regenerate on your machine).
 
@@ -32,31 +37,48 @@ Install **editable** with optional **`dev`** (pytest) and **`gui`** (Streamlit +
 pip install -e ".[dev,gui]"
 ```
 
-Minimal install without dashboard: `pip install -e ".[dev]"`.
+Minimal install without dashboard: `pip install -e ".[dev]"`.  
+Dashboard without pytest extras: `pip install -e ".[gui]"`.
 
 ---
 
 ## Setup — macOS / Linux
 
-From the repository root (directory that contains `pyproject.toml`):
+**Use the real folder where you cloned this repo** (it must contain `pyproject.toml`).  
+If `cd` fails, **do not** run `pip install` yet — from your home directory, `pip install -e .` can error with something like `file:///Users/yourname does not appear to be a Python project`.
+
+**Paste safety:** if you copy a line that ends with a “comment” meant for humans but the leading `#` is missing, **zsh can treat `<` as input redirection** and you may see `no such file or directory` for `--`. Put real shell comments on their own lines starting with `#`, or omit those hints entirely.
+
+Example when the repo lives under `Documents` with spaces in the name (change the path if yours differs):
 
 ```bash
-cd "/path/to/Thesis HW Codesign"
+cd "$HOME/Documents/My Projects/Thesis HW Codesign"
+ls pyproject.toml
+```
+
+If `ls` says there is no such file, fix the `cd` path before continuing. Do not run `pip install` from your home directory.
+
+```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev,gui]"
 ```
+
+On macOS you can also type `cd ` in Terminal, then **drag the project folder** into the window and press Enter (quotes are added automatically if needed).
 
 ---
 
 ## Setup — Windows (PowerShell)
 
 ```powershell
-cd "C:\path\to\Thesis HW Codesign"
+cd "C:\Users\YOURNAME\Documents\Thesis HW Codesign"
+Get-Item pyproject.toml
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,gui]"
 ```
+
+If `Get-Item` fails, fix the `cd` path first.
 
 If activation is blocked: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`.
 
@@ -79,19 +101,30 @@ Optional: **teacher + student** distillation — `hwa-train-distill --out-dir re
 
 Use **`--device cuda`** on any command that trains or evaluates if a GPU is available.
 
+**Match legacy HWA training (no schematic gain/offset on the noisy layers):**
+
+```bash
+hwa-train-hwa --no-hardware-aware ...
+hwa-train-distill --no-hardware-aware ...
+```
+
 ---
 
 ## Dashboard (optional)
+
+The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Noise profile** (Phase 5 CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
 
 ```bash
 hwa-dashboard
 ```
 
-Opens the Streamlit lab UI (typically `http://localhost:8501`). Equivalent:
+Opens the app (typically `http://localhost:8501`). Equivalent from repo root:
 
 ```bash
 python -m streamlit run src/hwa_gui/Home.py
 ```
+
+Full walkthrough, one-job-at-a-time behavior, and tab-to-phase mapping: **[`GUI_RUN.md`](GUI_RUN.md)**.
 
 ---
 
@@ -101,13 +134,13 @@ Console scripts are defined in `pyproject.toml`; after install they are on `PATH
 
 | Phase | Command | Notes |
 | ----- | ------- | ----- |
-| **1** Baseline | `hwa-train-baseline --out-dir results/run_baseline` | Writes `best.pt`, `metrics.json` (`fp32_test_accuracy`, `int4_ptq_test_accuracy`, parity error). |
+| **1** Baseline | `hwa-train-baseline --out-dir results/run_baseline` | Writes `best.pt`, `metrics.json`: `fp32_test_accuracy`, **`int4_ptq_test_accuracy_ideal`**, **`int4_ptq_test_accuracy_hardware`**, `parity_linear_c2c_max_abs_error`, `epochs`, `seed`. |
 | **2** Noisy eval | `hwa-eval-noisy --checkpoint …/best.pt --out …/noisy_eval.json` | Middle-bar input for thesis plot. |
 | **2** Γ sweep | `hwa-sweep-phase2 --checkpoint …/best.pt --out-dir results/phase2_sweep` | CSV/JSON under `out-dir`. |
-| **3** HWA | `hwa-train-hwa --out-dir results/run_hwa --gamma 0.02 --alpha 3.0` | Best noisy-validation checkpoint. |
-| **3** Grid | `hwa-sweep-hwa --out-dir results/sweep_hwa` | γ × α grid (long run). |
-| **4** Distill | `hwa-train-distill --out-dir results/run_distill` | Teacher + noisy student. |
-| **Fig** Thesis bars | `hwa-plot-thesis --baseline-dir … --hwa-checkpoint …/best.pt [--noisy-eval-json …]` | Uses `int4_ptq_test_accuracy` with fallback to legacy `int8_ptq_test_accuracy`. |
+| **3** HWA | `hwa-train-hwa --out-dir results/run_hwa --gamma 0.02 --alpha 3.0` | Best noisy-validation checkpoint. Adds **`hardware_aware`** to `metrics.json`. Use **`--no-hardware-aware`** for the old training behavior. |
+| **3** Grid | `hwa-sweep-hwa --out-dir results/sweep_hwa` | γ × α grid (long run). Honors **`--no-hardware-aware`**. |
+| **4** Distill | `hwa-train-distill --out-dir results/run_distill` | Teacher + noisy student. **`--no-hardware-aware`** supported. |
+| **Fig** Thesis bars | `hwa-plot-thesis --baseline-dir … --hwa-checkpoint …/best.pt [--noisy-eval-json …]` | Middle proxy uses **`int4_ptq_test_accuracy_ideal`**, then legacy `int4_ptq_test_accuracy` / `int8_ptq_test_accuracy` if present. |
 | **Fig** Parasitic | `hwa-plot-parasitic --out results/figures/parasitic_sweep.png` | MOM-oriented sweep **0–20%** (`--pdk-marker` optional). |
 
 **Phase 5 (hardware CSV):**
@@ -124,9 +157,9 @@ The loader expects columns such as `input_code`, `ideal_output`, `mean_output`, 
 
 | Path | Contents |
 | ---- | -------- |
-| `results/run_baseline/` | FP32 checkpoint, `metrics.json`, optional `noisy_eval.json` |
-| `results/run_hwa/` | HWA checkpoint, `metrics.json` |
-| `results/run_distill/` | Teacher/student checkpoints, `metrics.json` |
+| `results/run_baseline/` | FP32 checkpoint, `metrics.json` (dual INT4 PTQ keys), optional `noisy_eval.json` |
+| `results/run_hwa/` | HWA checkpoint, `metrics.json` (includes `hardware_aware`) |
+| `results/run_distill/` | Teacher/student checkpoints, `metrics.json` (includes `hardware_aware`) |
 | `results/phase2_sweep/` | `gamma_sweep.csv`, `.json` |
 | `results/figures/` | `thesis_bars.png`, `parasitic_sweep.png` |
 
@@ -143,7 +176,7 @@ mkdir -p "$MPLCONFIGDIR"
 
 ## Hardware track (short)
 
-Layout targets **UMC 65nm** SRAM CiM / **C-2C** ladder with **MOMCAPS_SY_MMKF** defaults in software. **PEX** netlists are for **Virtuoso/Spectre MC** — this repo consumes **simulation-derived tables** (CSV), not raw PEX text, unless you add tooling. See **Phase 5** and **layout scope** in `HWA_Training_Pipeline_Plan.md`.
+Layout targets **UMC 65nm** SRAM CiM / **C-2C** ladder with **MOMCAPS_SY_MMKF** defaults in software. **PEX** netlists are for **Virtuoso/Spectre MC** — this repo consumes **simulation-derived tables** (CSV), not raw PEX text, unless you add tooling. See **Phase 5** and **layout scope** in `background_info/HWA_Training_Pipeline_Plan.md`. Pre-layout **gain/offset** constants live in `src/hwa_cim/c2c.py` and are mirrored on `HWAConfig` in `src/hwa_cim/config.py`.
 
 ---
 

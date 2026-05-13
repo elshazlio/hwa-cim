@@ -7,7 +7,20 @@ from pathlib import Path
 
 import streamlit as st
 
-from hwa_gui.components import apply_page_style, confirm_overwrite, root
+st.set_page_config(
+    page_title="Run · HWA-CiM Lab",
+    page_icon="▶️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+from hwa_gui.components import (
+    apply_page_style,
+    confirm_overwrite,
+    pipeline_quick_reference_md,
+    render_pipeline_sidebar,
+    root,
+)
 from hwa_gui.job_runner import get_job, start_job
 from hwa_gui.log_panel import JOB_ID, render_live_log
 from hwa_gui.paths import project_root
@@ -15,9 +28,7 @@ from hwa_gui.paths import project_root
 os.chdir(project_root())
 
 apply_page_style()
-
-st.title("Run pipeline")
-st.caption("Jobs run in a background thread. Logs stream below.")
+render_pipeline_sidebar(current="Run")
 
 LOG_PATH = root() / "results" / ".dashboard_last.log"
 
@@ -36,21 +47,72 @@ def _maybe_start(fn_label: str, out_dir: Path, thunk) -> None:
     st.rerun()
 
 
+def _job_banner() -> None:
+    jj = get_job(JOB_ID)
+    if not jj:
+        return
+    if jj.running:
+        st.warning(
+            "**Job running** — only one job at a time on this page. "
+            "The live log is at the **bottom**; it auto-refreshes while the job runs."
+        )
+    elif jj.done and jj.error:
+        st.error("Last job ended with an error — see traceback at the bottom.")
+    elif jj.done:
+        st.success("**Last job finished.** Scroll to **Run log** below for full output.")
+
+
+st.title("Run pipeline")
+st.caption("Tabs follow the usual thesis order. Each tab is a natural stop: outputs go to disk under `results/`.")
+_job_banner()
+
+st.info(
+    """
+**How this page works**
+
+- Pick the **tab** that matches the experiment you want (phase numbers match the thesis / README).
+- Adjust paths if you use non-default output folders (defaults match the sidebar ✓ hints).
+- Press the **primary** button to start; confirm overwrite if the output folder already has files.
+- **One job at a time** — if something is running, wait for it before launching another.
+"""
+)
+
+with st.expander("Phases, partial runs, and picking up where you left off", expanded=False):
+    st.markdown(
+        """
+Each tab calls the same Python entrypoints as the CLI. If you already have `best.pt` or `metrics.json`
+from an earlier session, **skip ahead** to the tab that needs those paths—nothing is stored only in the browser.
+
+If you change output directories, use **Results** to locate artifacts; the sidebar checklist only tracks **default** paths.
+"""
+    )
+    st.markdown(pipeline_quick_reference_md())
+
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
     [
-        "Baseline",
-        "Noisy eval",
-        "Gamma sweep",
-        "HWA train",
-        "HWA sweep",
-        "Distill",
-        "Thesis plot",
-        "Parasitic plot",
+        "1 · Baseline",
+        "2a · Noisy eval",
+        "2b · Gamma sweep",
+        "3a · HWA train",
+        "3b · HWA sweep",
+        "4 · Distill",
+        "Fig · Thesis bars",
+        "Fig · Parasitic",
     ]
 )
 
 with tab1:
     st.subheader("Phase 1 — Baseline")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** trains FP32 MNIST micro-MLP, INT4 PTQ checks, MAC parity; writes `best.pt` and `metrics.json`.
+
+**Needs:** MNIST under your **Data dir** (downloaded automatically if missing).
+
+**Metrics:** newer runs include `int4_ptq_test_accuracy_ideal` and `int4_ptq_test_accuracy_hardware`; older runs may only show `int4_ptq_test_accuracy` (see AgDR-0001).
+"""
+        )
     c1, c2 = st.columns(2)
     data_dir = Path(c1.text_input("Data dir", value="data", key="b_data"))
     out_dir = Path(c2.text_input("Output dir", value="results/run_baseline", key="b_out"))
@@ -81,12 +143,25 @@ with tab1:
 
 with tab2:
     st.subheader("Phase 2 — Noisy eval")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** evaluates a trained checkpoint under CiM-shaped noise; optional JSON for the thesis middle bar.
+
+**Needs:** a **Checkpoint** path (typically Phase 1 `best.pt`).
+"""
+        )
     ck = st.text_input("Checkpoint", value="results/run_baseline/best.pt", key="n_ck")
     c1, c2, c3 = st.columns(3)
     gamma = c1.number_input("gamma", 0.0, 1.0, 0.02, format="%.4f", key="n_g")
     seeds = c2.number_input("Seeds", 1, 100, 10, key="n_seeds")
     device = c3.selectbox("Device", ["cpu", "cuda"], key="n_dev")
-    out_json = st.text_input("Output JSON (optional)", value="", key="n_out")
+    out_json = st.text_input(
+        "Output JSON (optional)",
+        value="results/run_baseline/noisy_eval.json",
+        key="n_out",
+        help="Set a path to save noisy eval stats for the thesis three-bar chart.",
+    )
     data_dir = st.text_input("Data dir", value="data", key="n_data")
     if st.button("Run noisy eval", type="primary", key="n_run"):
         outp = Path(out_json) if out_json.strip() else None
@@ -107,6 +182,14 @@ with tab2:
 
 with tab3:
     st.subheader("Phase 2 — Gamma sweep")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** sweeps noise strength γ on a fixed checkpoint; writes CSV/JSON under the sweep output dir.
+
+**Needs:** Phase 1 **Checkpoint**. Use **Charts → Gamma sweep** to visualize `gamma_sweep.csv` when done.
+"""
+        )
     ck = st.text_input("Checkpoint", value="results/run_baseline/best.pt", key="g_ck")
     out_dir = st.text_input("Sweep output dir", value="results/phase2_sweep", key="g_out")
     c1, c2 = st.columns(2)
@@ -129,6 +212,14 @@ with tab3:
 
 with tab4:
     st.subheader("Phase 3 — HWA train")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** noise-aware training (synthetic noise or **Phase 5** CSV profile).
+
+**Needs:** MNIST data. For **csv** noise mode, validate the file on **Noise profile** first, then paste its path here.
+"""
+        )
     c1, c2 = st.columns(2)
     data_dir = Path(c1.text_input("Data dir", value="data", key="h_data"))
     out_dir = Path(c2.text_input("Output dir", value="results/run_hwa", key="h_out"))
@@ -174,6 +265,14 @@ with tab4:
 
 with tab5:
     st.subheader("Phase 3 — HWA sweep (gamma × alpha grid)")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** grid search over γ and α; **long** runtime. Outputs CSV for **Charts → HWA sweep**.
+
+**Needs:** MNIST data only (no checkpoint from Phase 1 required for this entrypoint).
+"""
+        )
     c1, c2 = st.columns(2)
     data_dir = Path(c1.text_input("Data dir", value="data", key="hs_data"))
     out_dir = Path(c2.text_input("Output dir", value="results/sweep_hwa", key="hs_out"))
@@ -204,6 +303,14 @@ with tab5:
 
 with tab6:
     st.subheader("Phase 4 — Distillation")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** teacher–student distillation with noisy student path (optional teacher checkpoint).
+
+**Needs:** MNIST data. Optional **Teacher checkpoint**; leave empty if the run trains its own teacher.
+"""
+        )
     c1, c2 = st.columns(2)
     data_dir = Path(c1.text_input("Data dir", value="data", key="d_data"))
     out_dir = Path(c2.text_input("Output dir", value="results/run_distill", key="d_out"))
@@ -248,7 +355,15 @@ with tab6:
         _maybe_start("distill", od, _go)
 
 with tab7:
-    st.subheader("Thesis — three-bar chart")
+    st.subheader("Thesis — three-bar chart (PNG)")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** writes a static PNG comparing baseline / noisy / HWA bars.
+
+**Needs:** `metrics.json` in the **baseline dir**; HWA **`best.pt`** with `metrics.json` beside it; optional **noisy eval JSON** for the middle bar (Phase 2a default path works if you saved it there).
+"""
+        )
     bdir = st.text_input("Baseline dir (metrics.json)", value="results/run_baseline", key="p_bdir")
     hw_ck = st.text_input("HWA checkpoint", value="results/run_hwa/best.pt", key="p_hw")
     noisy = st.text_input("Noisy eval JSON (optional)", value="results/run_baseline/noisy_eval.json", key="p_ne")
@@ -270,7 +385,15 @@ with tab7:
         _maybe_start("thesis chart", od, _go)
 
 with tab8:
-    st.subheader("Parasitic sweep figure")
+    st.subheader("Parasitic sweep figure (PNG)")
+    with st.expander("What this does & prerequisites", expanded=False):
+        st.markdown(
+            """
+**Does:** generates the parasitic comparison figure used in the thesis write-up (no training required).
+
+**Needs:** nothing on disk — only the **PDK marker ratio** slider.
+"""
+        )
     out_png = st.text_input("Output PNG", value="results/figures/parasitic_sweep.png", key="par_out")
     pdk = st.number_input("PDK marker ratio", 0.0, 0.5, 0.30, format="%.2f", key="par_pdk")
     if st.button("Generate parasitic plot", type="primary", key="par_run"):
@@ -284,13 +407,13 @@ with tab8:
         _maybe_start("parasitic plot", od, _go)
 
 st.divider()
+st.subheader("Run log")
 lp = st.session_state.get("log_path")
 if lp:
     render_live_log(Path(lp))
+else:
+    st.caption("No job started yet — logs appear here after you press a run button.")
+
 j = get_job(JOB_ID)
 if j and j.done and j.error:
     st.error(j.error)
-# Job status
-jj = get_job(JOB_ID)
-if jj:
-    st.caption(f"Job: running={jj.running} done={jj.done}")

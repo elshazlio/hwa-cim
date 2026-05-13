@@ -6,6 +6,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from hwa_cim.c2c import (
+    G_EFF_DENSE,
+    G_EFF_SPARSE,
+    OFFSET_DENSE_V,
+    POPULATION_DENSE_MIN,
+    POPULATION_SPARSE_MAX,
+)
+
 
 @dataclass
 class DataConfig:
@@ -34,6 +42,12 @@ class HWAConfig:
     parasitic_ratio: float = 0.0  # 0 = ideal ladder behavior in forward
     noise_mode: str = "synthetic"  # synthetic | csv
     noise_profile_csv: Optional[Path] = None
+    hardware_aware: bool = False
+    g_eff_sparse: float = G_EFF_SPARSE
+    g_eff_dense: float = G_EFF_DENSE
+    offset_dense_v: float = OFFSET_DENSE_V
+    population_sparse_max: int = POPULATION_SPARSE_MAX
+    population_dense_min: int = POPULATION_DENSE_MIN
 
 
 @dataclass

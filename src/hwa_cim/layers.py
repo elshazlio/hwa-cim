@@ -6,8 +6,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from hwa_cim.c2c import compute_g_eff, compute_offset
 from hwa_cim.noise import additive_weight_noise, additive_weight_noise_sigma
-from hwa_cim.quantization import clip_weights_by_std, fake_quantize_int4_ste
+from hwa_cim.quantization import clip_weights_by_std, fake_quantize_int4_ste, symmetric_quantize_int4
 
 
 def adc_quantize_ste(y: torch.Tensor, bits: int = 4) -> torch.Tensor:
@@ -40,6 +41,12 @@ class NoisyQuantLinear(nn.Module):
         adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
+        hardware_aware: bool = False,
+        g_eff_sparse: float | None = None,
+        g_eff_dense: float | None = None,
+        offset_dense_v: float | None = None,
+        population_sparse_max: int | None = None,
+        population_dense_min: int | None = None,
     ) -> None:
         super().__init__()
         self.in_features = in_features
@@ -50,6 +57,12 @@ class NoisyQuantLinear(nn.Module):
         self.adc_bits = adc_bits
         self.noise_mode = noise_mode
         self.sigma_global = sigma_global
+        self.hardware_aware = hardware_aware
+        self._g_eff_sparse = g_eff_sparse
+        self._g_eff_dense = g_eff_dense
+        self._offset_dense_v = offset_dense_v
+        self._population_sparse_max = population_sparse_max
+        self._population_dense_min = population_dense_min
         self.linear = nn.Linear(in_features, out_features, bias=bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -68,6 +81,22 @@ class NoisyQuantLinear(nn.Module):
         else:
             w_noisy = w_q
         y = F.linear(x, w_noisy, b)
+        if self.hardware_aware:
+            w_pop_q, _ = symmetric_quantize_int4(w)
+            g_eff = compute_g_eff(
+                w_pop_q,
+                g_eff_sparse=self._g_eff_sparse,
+                g_eff_dense=self._g_eff_dense,
+                population_sparse_max=self._population_sparse_max,
+                population_dense_min=self._population_dense_min,
+            ).to(dtype=y.dtype, device=y.device)
+            offset = compute_offset(
+                w_pop_q,
+                offset_dense_v=self._offset_dense_v,
+                population_sparse_max=self._population_sparse_max,
+                population_dense_min=self._population_dense_min,
+            ).to(dtype=y.dtype, device=y.device)
+            y = y * g_eff.unsqueeze(0) + offset.unsqueeze(0)
         if self.use_adc:
             y = adc_quantize_ste(y, self.adc_bits)
         return y

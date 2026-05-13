@@ -34,33 +34,46 @@ def accuracy(model: nn.Module, loader: torch.utils.data.DataLoader, device: torc
 
 
 @torch.no_grad()
-def forward_int4_mlp(model: MicroMLP, x: torch.Tensor) -> torch.Tensor:
+def forward_int4_mlp(
+    model: MicroMLP,
+    x: torch.Tensor,
+    *,
+    hardware_aware: bool = False,
+) -> torch.Tensor:
     """Layerwise INT4 weight + uint4 activation MAC + ReLU (PTQ-style)."""
     x = model.flatten(x)
-    for i, (fc, relu) in enumerate(
-        [
-            (model.fc1, model.relu1),
-            (model.fc2, model.relu2),
-        ]
-    ):
+    for fc, relu in [
+        (model.fc1, model.relu1),
+        (model.fc2, model.relu2),
+    ]:
         w_q, sw = symmetric_quantize_int4(fc.weight)
         x_q, sx, shift = quantize_uint4(x)
-        x = c2c_mac(w_q, x_q, sw, sx, fc.bias, shift_x=shift)
+        x = c2c_mac(
+            w_q, x_q, sw, sx, fc.bias, shift_x=shift, hardware_aware=hardware_aware
+        )
         x = relu(x)
     w3_q, sw3 = symmetric_quantize_int4(model.fc3.weight)
     x_q, sx, shift = quantize_uint4(x)
-    logits = c2c_mac(w3_q, x_q, sw3, sx, model.fc3.bias, shift_x=shift)
+    logits = c2c_mac(
+        w3_q, x_q, sw3, sx, model.fc3.bias, shift_x=shift, hardware_aware=hardware_aware
+    )
     return logits
 
 
 @torch.no_grad()
-def accuracy_int4(model: MicroMLP, loader: torch.utils.data.DataLoader, device: torch.device) -> float:
+def accuracy_int4(
+    model: MicroMLP,
+    loader: torch.utils.data.DataLoader,
+    device: torch.device,
+    *,
+    hardware_aware: bool = False,
+) -> float:
     model.eval()
     correct = 0
     total = 0
     for x, y in loader:
         x, y = x.to(device), y.to(device)
-        logits = forward_int4_mlp(model, x)
+        logits = forward_int4_mlp(model, x, hardware_aware=hardware_aware)
         pred = logits.argmax(dim=-1)
         correct += (pred == y).sum().item()
         total += y.numel()
@@ -84,7 +97,10 @@ def parity_linear_vs_c2c(device: torch.device = torch.device("cpu")) -> float:
     x = torch.randn(32, 128, device=device)
     w_q, sw = symmetric_quantize_int4(lin.weight)
     x_q, sx, shift = quantize_uint4(x)
-    y_mac = c2c_mac(w_q, x_q, sw, sx, lin.bias, shift_x=shift)
+    # Ideal dequant path only (not schematic gain/offset).
+    y_mac = c2c_mac(
+        w_q, x_q, sw, sx, lin.bias, shift_x=shift, hardware_aware=False
+    )
     x_dq = x_q.to(torch.float32) * sx + shift
     w_dq = w_q.to(torch.float32) * sw
     y_ref = F.linear(x_dq, w_dq, lin.bias)

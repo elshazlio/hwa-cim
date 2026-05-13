@@ -11,14 +11,26 @@ from pathlib import Path
 
 import streamlit as st
 
-from hwa_gui.components import apply_page_style, root
+st.set_page_config(
+    page_title="Charts · HWA-CiM Lab",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
 
 apply_page_style()
+render_pipeline_sidebar(current="Charts")
 
 st.title("Charts")
+st.info(
+    "Interactive Plotly views of the same data as the **Fig ·** tabs on **Run**. "
+    "Use after sweeps or training so CSV / `metrics.json` paths exist."
+)
 
 kind = st.selectbox(
     "Chart type",

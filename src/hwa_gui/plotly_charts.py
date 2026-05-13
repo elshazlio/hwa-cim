@@ -88,7 +88,10 @@ def figure_thesis_three_bar(
     else:
         proxy = base_m.get("int4_noisy_proxy", base_m.get("int8_noisy_proxy"))
         if proxy is None:
-            ptq = base_m.get("int4_ptq_test_accuracy", base_m.get("int8_ptq_test_accuracy"))
+            ptq = base_m.get(
+                "int4_ptq_test_accuracy_ideal",
+                base_m.get("int4_ptq_test_accuracy", base_m.get("int8_ptq_test_accuracy")),
+            )
             proxy = float(ptq) * 0.92
         int4_noisy = float(proxy)
     hwa_dir = hwa_checkpoint.parent

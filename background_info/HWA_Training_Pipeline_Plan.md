@@ -37,6 +37,7 @@ Building the software infrastructure now means that when the hardware noise prof
   - Your C-2C ladder has 4 rows; each row stores 1 binary weight bit. Effective weight precision per column = 4 bits. Input activations are driven by a 4-bit DAC, one per row. The model must operate at this precision end-to-end.
   - Implement post-training quantization (PTQ) first: clamp weights to [−8, 7] (signed INT4), scale activations to 4-bit unsigned [0, 15].
   - Record accuracy drop from FP32 → INT4. This is your "quantization-only" baseline.
+  - **Repository:** `hwa-train-baseline` writes **`int4_ptq_test_accuracy_ideal`** (ideal `c2c_mac`, matches `nn.Linear` parity) and **`int4_ptq_test_accuracy_hardware`** (same INT4 grid with schematic-style gain/offset). Report both where the thesis distinguishes ideal quantization from macro-shaped behavior.
 3. **Build a software MAC simulator**
   - Write a Python function `c2c_mac(weights_4bit, activations_4bit)` that computes the ideal (noiseless) output of your C-2C ladder.
   - This is the mathematical model from Wang's equation: `V_OUT = V_REF * Σ(b_i * 2^(i-k))` where k=4 (4-bit precision).
@@ -51,7 +52,7 @@ Building the software infrastructure now means that when the hardware noise prof
 | 1.1 | Trained FP32 micro-MLP    | ≥97% MNIST test accuracy                                   |
 | 1.2 | INT4 quantized model      | Accuracy recorded; expected drop from FP32 baseline        |
 | 1.3 | Software MAC simulator    | Output matches `nn.Linear` within 1e-6 for all test inputs; validated at 4-bit input/weight precision |
-| 1.4 | Baseline comparison table | FP32 vs. INT4 accuracy logged                              |
+| 1.4 | Baseline comparison table | FP32 vs INT4 accuracy logged (`int4_ptq_test_accuracy_ideal` + `int4_ptq_test_accuracy_hardware` in `metrics.json`) |
 
 
 ---
@@ -112,6 +113,7 @@ Building the software infrastructure now means that when the hardware noise prof
   - Train from scratch (not fine-tuning the Phase 1 model).
   - Inject noise every forward pass during training with the same γ_weight used in Phase 2.
   - Use straight-through estimator (STE) for backpropagation through the quantization and noise layers.
+  - **Repository:** `hwa-train-hwa` enables **schematic-style gain/offset** on the noisy linear forward path by default; use **`--no-hardware-aware`** to reproduce runs from before that behavior existed.
   - Train for 20–50 epochs (the model is small, this will be fast).
 3. **Hyperparameter sweep**
   - Sweep γ_weight ∈ {0.01, 0.02, 0.04} × α ∈ {2.0, 3.0, 4.0} = 9 experiments.

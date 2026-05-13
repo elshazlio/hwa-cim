@@ -8,16 +8,28 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+st.set_page_config(
+    page_title="Noise profile · HWA-CiM Lab",
+    page_icon="🎚️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 from hwa_cim.noise import NoiseProfileCSV
 
-from hwa_gui.components import apply_page_style, root
+from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
 
 apply_page_style()
+render_pipeline_sidebar(current="Noise profile")
 
 st.title("Noise profile (CSV)")
+st.info(
+    "**Phase 5** — validate a hardware or Monte Carlo noise CSV before **Run → 3a HWA train** "
+    "with noise mode **csv**."
+)
 
 st.markdown(
     """

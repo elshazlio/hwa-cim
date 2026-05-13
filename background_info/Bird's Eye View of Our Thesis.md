@@ -2,7 +2,7 @@ Based on your project status and the "Analog Foundation Models" methodology outl
 
 You are currently transitioning from **Phase 2 (Component Design)** to **Phase 3 (Integration & Optimization)**. The path forward involves three parallel tracks: Circuit/Layout, Parasitic Extraction, and AI Co-Design.
 
-1. The Circuit Track: Finishing the Macro (Next 2-3 Weeks)
+1. The Circuit Track: Finishing the Macro
 
 You have a 4x4 array and a DAC. You need to turn this into a functional "Compute Macro."
 
@@ -13,7 +13,7 @@ You have a 4x4 array and a DAC. You need to turn this into a functional "Compute
 - **Design the SAR-ADC:** Your teammates are researching this. They should prioritize a **C-2C SAR-ADC**.
   - *Why:* It reuses the exact same capacitor structure you are building for the array, saving design time and area. It fits the "Hybrid" nature of your architecture.
 
-2. The Physical Track: Layout & Parasitics (The "Pain" Phase)
+1. The Physical Track: Layout & Parasitics (The "Pain" Phase)
 
 This is where the reality of UMC 65nm hits. You cannot rely on schematic simulations anymore.
 
@@ -23,13 +23,13 @@ This is where the reality of UMC 65nm hits. You cannot rely on schematic simulat
 - **The "Tuning" Step:** You will likely see your linear staircase output become non-linear (curved).
   - *The Fix:* You must iteratively resize the **serial capacitors** in the layout. Instead of exactly 2C, you might need 2.3C or 2.5C to cancel out the parasitics. This iterative tuning to restore linearity is a key engineering contribution of your thesis.
 
-3. The AI Track: Hardware-Software Co-Design (The "Analog Foundation" Method)
+1. The AI Track: Hardware-Software Co-Design (The "Analog Foundation" Method)
 
 Once your layout is tuned, you stop trying to make the hardware "perfect" and start making the software "smart." This follows the **Analog Foundation Models** methodology.
 
 - **Step A: Noise Profiling (Hardware to Software):**
   - Run **Monte Carlo simulations** on your extracted layout.
-  - Measure the *deviation* of the output voltage from the ideal value. Capture the **Mean (**μ**)** and **Standard Deviation (**σ**)** of the error for different input patterns.
+  - Measure the *deviation* of the output voltage from the ideal value. Capture the **Mean (μ)** and **Standard Deviation (σ)** of the error for different input patterns.
   - *Output:* A "Noise Profile" (e.g., a lookup table or a math function describing your chip's specific errors).
 - **Step B: Noise-Aware Training (Software Loop):**
   - Build a training loop in PyTorch (as described in your source).
@@ -38,7 +38,7 @@ Once your layout is tuned, you stop trying to make the hardware "perfect" and st
 - **Step C: Data Distillation (Validation):**
   - Use a large pre-trained "Teacher" model to generate synthetic data to train your smaller "Student" model (the one that will run on your chip). This allows you to validate accuracy without needing massive datasets or weeks of GPU time.
 
-4. The Final Thesis Contribution: Inter-Array Scaling
+1. The Final Thesis Contribution: Inter-Array Scaling
 
 Your literature review identified "Power Losses in Multi-Array Scaling" as your core research gap.
 
@@ -48,7 +48,7 @@ Your literature review identified "Power Losses in Multi-Array Scaling" as your 
 
 Summary Checklist for "The End"
 
-1. [ ] **Schematic:** 8x8 Array with C-2C logic + R-2R DAC + SAR-ADC fully integrated.
+1. [done] **Schematic:** 4x4 Array with C-2C logic + R-2R DAC + SAR-ADC fully integrated.
 2. [ ] **Layout:** Clean layout of the macro in UMC 65nm.
 3. [ ] **Tuning:** Post-layout simulation showing decent linearity (after resizing serial caps).
 4. [ ] **Noise Profile:** A graph showing Error vs. Output Code from Monte Carlo.

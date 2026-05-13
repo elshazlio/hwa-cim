@@ -9,14 +9,23 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from hwa_gui.components import apply_page_style, root
+st.set_page_config(
+    page_title="Compare · HWA-CiM Lab",
+    page_icon="⚖️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
 
 apply_page_style()
+render_pipeline_sidebar(current="Compare")
 
 st.title("Compare runs")
+st.info("Select multiple `metrics.json` files to compare runs side by side (e.g. Phase 1 baseline vs Phase 3 HWA).")
 
 r = root()
 res = r / "results"
@@ -47,4 +56,8 @@ if rows:
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-st.caption("Tip: include Phase 1 baseline + Phase 3 HWA to compare `fp32_test_accuracy` vs `final_noisy_mean` (Phase 1 also logs `int4_ptq_test_accuracy`).")
+st.caption(
+    "Tip: include Phase 1 baseline + Phase 3 HWA to compare `fp32_test_accuracy` vs `final_noisy_mean`. "
+    "Phase 1 logs `int4_ptq_test_accuracy_ideal` and `int4_ptq_test_accuracy_hardware` "
+    "(legacy runs may use `int4_ptq_test_accuracy` only — see **AgDR-0001**)."
+)

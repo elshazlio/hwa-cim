@@ -69,12 +69,14 @@ def run_baseline(
     assert best_state is not None
     model.load_state_dict(best_state)
     fp32_acc = accuracy(model, test_loader, dev)
-    int4_acc = accuracy_int4(model, test_loader, dev)
+    int4_ideal = accuracy_int4(model, test_loader, dev, hardware_aware=False)
+    int4_hw = accuracy_int4(model, test_loader, dev, hardware_aware=True)
     par = parity_linear_vs_c2c(dev)
 
     metrics = {
         "fp32_test_accuracy": fp32_acc,
-        "int4_ptq_test_accuracy": int4_acc,
+        "int4_ptq_test_accuracy_ideal": int4_ideal,
+        "int4_ptq_test_accuracy_hardware": int4_hw,
         "parity_linear_c2c_max_abs_error": par,
         "epochs": epochs,
         "seed": seed,

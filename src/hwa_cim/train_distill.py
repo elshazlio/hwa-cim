@@ -93,6 +93,7 @@ def run_distill(
     teacher_checkpoint: Path | None = None,
     seed: int = 42,
     device: str = "cpu",
+    hardware_aware: bool = True,
 ) -> dict:
     """Phase 4 distillation. Returns metrics dict."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -113,6 +114,7 @@ def run_distill(
         gamma=gamma,
         alpha_clip=alpha_clip,
         use_adc=True,
+        hardware_aware=hardware_aware,
     ).to(dev)
     opt = torch.optim.Adam(student.parameters(), lr=lr)
 
@@ -143,6 +145,7 @@ def run_distill(
 
     metrics = {
         "teacher_accuracy": t_acc,
+        "hardware_aware": hardware_aware,
         "student_clean": final_clean,
         "student_noisy_mean": nm,
         "student_noisy_std": ns,
@@ -168,6 +171,11 @@ def main() -> None:
     ap.add_argument("--teacher-checkpoint", type=Path, default=None)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--device", default="cpu")
+    ap.add_argument(
+        "--no-hardware-aware",
+        action="store_true",
+        help="Disable schematic gain/offset in NoisyQuantLinear",
+    )
     args = ap.parse_args()
     run_distill(
         data_dir=args.data_dir,
@@ -183,6 +191,7 @@ def main() -> None:
         teacher_checkpoint=args.teacher_checkpoint,
         seed=args.seed,
         device=args.device,
+        hardware_aware=not args.no_hardware_aware,
     )
 
 

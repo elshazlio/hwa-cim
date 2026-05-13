@@ -8,14 +8,26 @@ from pathlib import Path
 
 import streamlit as st
 
-from hwa_gui.components import apply_page_style, root
+st.set_page_config(
+    page_title="Results · HWA-CiM Lab",
+    page_icon="📁",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
 
 apply_page_style()
+render_pipeline_sidebar(current="Results")
 
 st.title("Results browser")
+st.info(
+    "Browse everything under `results/`: `metrics.json`, checkpoints (`.pt`), CSVs, and figures. "
+    "Use this after a **partial run** to confirm files exist before the next **Run** tab."
+)
 
 r = root()
 res = r / "results"

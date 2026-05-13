@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from hwa_cim.data import get_mnist_loaders
 from hwa_cim.evaluate import accuracy
@@ -73,6 +72,7 @@ def run_hwa_train(
     noise_mode: str = "synthetic",
     noise_profile: Path | None = None,
     eval_noisy_seeds: int = 10,
+    hardware_aware: bool = True,
 ) -> dict:
     """Phase 3 HWA training. Returns metrics dict."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -95,6 +95,7 @@ def run_hwa_train(
         adc_bits=4,
         noise_mode=noise_mode,
         sigma_global=sigma_global,
+        hardware_aware=hardware_aware,
     ).to(dev)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     crit = nn.CrossEntropyLoss()
@@ -125,6 +126,7 @@ def run_hwa_train(
     metrics = {
         "gamma": gamma,
         "alpha_clip": alpha,
+        "hardware_aware": hardware_aware,
         "final_clean_accuracy": final_clean,
         "final_noisy_mean": final_noisy_mean,
         "final_noisy_std": final_noisy_std,
@@ -145,6 +147,7 @@ def run_hwa_sweep(
     lr: float = 1e-3,
     seed: int = 42,
     device: str = "cpu",
+    hardware_aware: bool = True,
 ) -> dict:
     """Grid sweep over gamma x alpha; writes CSV/JSON under out_dir."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -158,7 +161,9 @@ def run_hwa_sweep(
 
     for g in gammas:
         for a in alphas:
-            model = NoisyMicroMLP(gamma=g, alpha_clip=a, use_adc=True).to(dev)
+            model = NoisyMicroMLP(
+                gamma=g, alpha_clip=a, use_adc=True, hardware_aware=hardware_aware
+            ).to(dev)
             opt = torch.optim.Adam(model.parameters(), lr=lr)
             for _ in range(epochs):
                 train_one_epoch(model, train_loader, opt, dev, crit)
@@ -198,6 +203,11 @@ def main() -> None:
     ap.add_argument("--noise-mode", choices=("synthetic", "csv"), default="synthetic")
     ap.add_argument("--noise-profile", type=Path, default=None)
     ap.add_argument("--eval-noisy-seeds", type=int, default=10)
+    ap.add_argument(
+        "--no-hardware-aware",
+        action="store_true",
+        help="Disable schematic gain/offset in NoisyQuantLinear (legacy training path)",
+    )
     args = ap.parse_args()
     run_hwa_train(
         data_dir=args.data_dir,
@@ -212,6 +222,7 @@ def main() -> None:
         noise_mode=args.noise_mode,
         noise_profile=args.noise_profile,
         eval_noisy_seeds=args.eval_noisy_seeds,
+        hardware_aware=not args.no_hardware_aware,
     )
 
 
@@ -224,6 +235,11 @@ def main_sweep() -> None:
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--device", default="cpu")
+    ap.add_argument(
+        "--no-hardware-aware",
+        action="store_true",
+        help="Disable schematic gain/offset in NoisyQuantLinear",
+    )
     args = ap.parse_args()
     run_hwa_sweep(
         data_dir=args.data_dir,
@@ -233,6 +249,7 @@ def main_sweep() -> None:
         lr=args.lr,
         seed=args.seed,
         device=args.device,
+        hardware_aware=not args.no_hardware_aware,
     )
 
 
