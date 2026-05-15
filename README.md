@@ -6,7 +6,8 @@ The stack also supports an **optional schematic-style MAC model**: population-de
 
 **Detailed methodology and thesis checklist:** [`background_info/HWA_Training_Pipeline_Plan.md`](background_info/HWA_Training_Pipeline_Plan.md)  
 **Streamlit lab (GUI) — install, tour, partial runs:** [`GUI_RUN.md`](GUI_RUN.md)  
-**Agent Decision Records (architecture / calibration choices):** [`docs/agdr/README.md`](docs/agdr/README.md)
+**Agent Decision Records (architecture / calibration choices):** [`docs/agdr/README.md`](docs/agdr/README.md)  
+**Software vs hardware roadmap (follow-ups):** [`docs/software_mission_followups.md`](docs/software_mission_followups.md)
 
 ---
 
@@ -176,7 +177,9 @@ mkdir -p "$MPLCONFIGDIR"
 
 ## Hardware track (short)
 
-Layout targets **UMC 65nm** SRAM CiM / **C-2C** ladder with **MOMCAPS_SY_MMKF** defaults in software. **PEX** netlists are for **Virtuoso/Spectre MC** — this repo consumes **simulation-derived tables** (CSV), not raw PEX text, unless you add tooling. See **Phase 5** and **layout scope** in `background_info/HWA_Training_Pipeline_Plan.md`. Pre-layout **gain/offset** constants live in `src/hwa_cim/c2c.py` and are mirrored on `HWAConfig` in `src/hwa_cim/config.py`.
+**Cadence (Virtuoso) schematic:** The team target is **UMC 65 nm** full-custom **SRAM CiM**: **4×4** array, **decoder**, **DAC**, and **SAR ADC** integrated at schematic level with **C-2C** charge-domain MAC; the **SAR comparator** is currently an **ideal library** block for schedule, to be swapped for **full custom** later. **Software** uses **MOMCAPS_SY_MMKF**-style defaults for the **parasitic ladder toy model** (`src/hwa_cim/c2c.py`); see `background_info/HWA_Training_Pipeline_Plan.md` for MOM vs MIM notes.
+
+**This repository** still consumes **simulation-derived CSV** (μ, σ, codes) for Phase 5 — not raw PEX — unless you add parsers. Pre-layout **gain/offset** knobs (`hardware_aware`) mirror schematic verification numbers; **PEX + Monte Carlo** replace them for thesis-grade claims. Roadmap and checklist: **`background_info/Bird's Eye View of Our Thesis.md`**. Software vs hardware gaps: **`docs/software_mission_followups.md`**.
 
 ---
 

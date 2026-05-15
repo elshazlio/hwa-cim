@@ -276,3 +276,9 @@ Validation will follow an **"Analog Foundation Models" methodology** to bridge t
 \[13\] C. Wang, "Ultra-low Voltage Static Random Access Memory Design for Energy-Constrained Applications," Ph.D. Thesis, Nanyang Technological University, Singapore, 2015\. 
 
 \[14\] C. Shin, "Advanced MOSFET Designs and Implications for SRAM Scaling," Ph.D. Dissertation, University of California, Berkeley, 2011\.
+
+---
+
+## Addendum — implementation scope (repository, 2026)
+
+The **software testbed** (`hwa-cim`) and the **current Virtuoso schematic milestone** align on a **4×4** UMC 65 nm **SRAM–CiM** macro with integrated **decoder, DAC, and SAR ADC** (see `background_info/Bird's Eye View of Our Thesis.md`). Earlier body text that discusses **8×8 or 16×16** arrays remains valid as **literature and scaling** motivation; **first-extract / first-tapeout scope** for this project is **4×4** unless a future design review changes it. For software–hardware traceability and open follow-ups, see `docs/software_mission_followups.md`.

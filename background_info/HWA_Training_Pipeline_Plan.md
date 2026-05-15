@@ -4,7 +4,9 @@
 **Methodology:** Analog Foundation Models [Rasch et al., 2025]
 **Target Model:** Micro-MLP for MNIST (thesis-scoped)
 **Owner:** Omar (or delegated team member)
-**Hardware dependency:** NONE until Phase 5
+**Hardware dependency (for *this* Python repo):** NONE until Phase 5 **Monte Carlo CSV** is ready — you can train on synthetic noise and schematic-style gain/offset today.
+
+**Cadence schematic status (team, 2026):** Virtuoso includes **schematic-level** integration of the **4×4 SRAM–MAC** macro, **decoder**, **DAC**, and **SAR ADC** (UMC 65 nm full custom for the SRAM/MAC core; **SAR comparator** currently an **ideal Cadence library** model for schedule, to be replaced with full custom). **Layout and PEX** remain the bridge from those schematics to the **Phase 5** files this repo ingests.
 
 ---
 
