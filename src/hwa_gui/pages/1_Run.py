@@ -227,12 +227,16 @@ with tab4:
         "Synthetic AFM Noise",
         "Maestro PEX Calibration",
         "PEX Corner Proxy",
+        "Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)",
         "True Monte Carlo CSV",
     ]
     profile_to_mode = {
         "Synthetic AFM Noise": "synthetic",
         "Maestro PEX Calibration": "maestro_pex",
         "PEX Corner Proxy": "pex_corner_proxy",
+        "Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)": (
+            "surrogate_mc"
+        ),
         "True Monte Carlo CSV": "monte_carlo_csv",
     }
     hw_profile_label = st.selectbox(
@@ -281,6 +285,11 @@ with tab4:
         np_path = Path(noise_profile) if noise_profile.strip() else None
         r = root()
 
+        if hw_mode == "surrogate_mc":
+            st.warning(
+                "Phase 4.5 surrogate mode records provenance only. Training uses synthetic noise "
+                "(not Phase 5 CSV). Generate summaries on **Hardware profiles → Phase 4.5 Surrogate MC**."
+            )
         if hw_mode == "monte_carlo_csv" and not np_path:
             st.error("True Monte Carlo CSV mode requires a noise profile CSV path.")
             st.stop()
@@ -304,6 +313,9 @@ with tab4:
                 cal_path = r / cal_yaml
         elif hw_mode == "pex_corner_proxy":
             noise_mode = "csv"
+            cal_path = r / cal_yaml if cal_yaml.strip() else None
+        elif hw_mode == "surrogate_mc":
+            noise_mode = "synthetic"
             cal_path = r / cal_yaml if cal_yaml.strip() else None
         else:
             noise_mode = "csv"

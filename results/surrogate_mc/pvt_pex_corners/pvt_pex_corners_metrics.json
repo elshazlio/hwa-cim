@@ -1,0 +1,42 @@
+{
+  "phase_label": "Phase 4.5",
+  "profile_warning": "Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma",
+  "corners": [
+    {
+      "corner": "0",
+      "signal": "/OA_Charge",
+      "sample_time_ns": 200.25,
+      "nopex_v": 0.8263959330728287,
+      "pex_v": NaN,
+      "delta_v": NaN,
+      "relative_gain": NaN,
+      "profile_kind": "pvt_pex_corner_deterministic",
+      "phase_label": "Phase 4.5",
+      "profile_warning": "Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma"
+    },
+    {
+      "corner": "ff",
+      "signal": "/OA_Charge",
+      "sample_time_ns": 200.25,
+      "nopex_v": NaN,
+      "pex_v": 0.7518724522666914,
+      "delta_v": NaN,
+      "relative_gain": NaN,
+      "profile_kind": "pvt_pex_corner_deterministic",
+      "phase_label": "Phase 4.5",
+      "profile_warning": "Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma"
+    },
+    {
+      "corner": "nominal",
+      "signal": "/OA_Charge",
+      "sample_time_ns": 200.25,
+      "nopex_v": NaN,
+      "pex_v": 0.7895918196271932,
+      "delta_v": NaN,
+      "relative_gain": NaN,
+      "profile_kind": "pvt_pex_corner_deterministic",
+      "phase_label": "Phase 4.5",
+      "profile_warning": "Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma"
+    }
+  ]
+}

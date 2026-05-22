@@ -78,9 +78,9 @@ python -m streamlit run src/hwa_gui/Home.py
 | **Results** | Pick a `metrics.json`; list checkpoints, CSVs, JSON, PNGs under `results/`. |
 | **Compare** | Multi-select `metrics.json` files → one table (good for Phase 1 vs Phase 3). |
 | **Charts** | Interactive Plotly (parasitic, gamma sweep CSV, HWA sweep CSV, thesis bars)—same data as some **Run** figure tabs. |
-| **Hardware profiles** | **Synthetic** (default), **Maestro PEX** (deterministic `/OA_Charge` cal — *not* MC σ), **PEX corners** (proxy only), **Monte Carlo CSV** (true Phase 5). Run **3a** uses a **hardware profile mode** banner so modes are not confused. |
+| **Hardware profiles** | **Synthetic** (default), **Maestro PEX** (deterministic `/OA_Charge` cal — *not* MC σ), **PEX corners** (proxy only), **Phase 4.5 Surrogate MC** (wide VIVA parser + plots — *not* foundry MC), **Monte Carlo CSV** (true Phase 5). Run **3a** uses a **hardware profile mode** banner so modes are not confused. |
 
-**Do not treat Maestro PEX as Phase 5:** it writes `calibration_pex.yaml` and waveform PNGs; HWA still trains with **synthetic** γ unless you pick **True Monte Carlo CSV**. The thesis three-bar chart (**Run → Fig · Thesis bars**) is **FP32 / INT4+noise / HWA**, not “PEX drop → HWA recovery.”
+**Do not treat Maestro PEX or Phase 4.5 surrogate as Phase 5:** Maestro PEX writes `calibration_pex.yaml` and waveform PNGs. Phase 4.5 runs `hwa-surrogate-mc` and `hwa-plot-surrogate-mc` for thesis artifacts; HWA still trains with **synthetic** γ unless you pick **True Monte Carlo CSV**. The thesis three-bar chart (**Run → Fig · Thesis bars**) is **FP32 / INT4+noise / HWA**, not “PEX drop → HWA recovery.”
 
 The **sidebar** on every page has the **built-in page navigation** at the top (labels from `Home.py`), then a short lab description, a **✓/○ checklist** for *default* artifact paths (`results/run_baseline/best.pt`, `results/run_baseline/noisy_eval.json`, `results/run_hwa/best.pt`), and a **suggested next step**. If you use custom output directories, rely on **Results**; the checklist is only a hint for the default layout.
 

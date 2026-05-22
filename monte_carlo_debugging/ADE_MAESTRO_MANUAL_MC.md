@@ -259,9 +259,23 @@ For **hwa-cim** Phase 5 statistical MC, use only exports that include `input_cod
 
 ---
 
+## Software handoff (Phase 4.5)
+
+After exporting wide VIVA CSVs to `stuff_from_cadence/`:
+
+```bash
+hwa-surrogate-mc --all-defaults
+hwa-plot-surrogate-mc
+```
+
+This produces **Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)** summaries and plots under `results/surrogate_mc/` and `results/plots/03_surrogate_mc/`. These are **not** the Phase 5 `input_code` noise profile; do not label as UMC-certified Monte Carlo. See [AgDR-0005](../docs/agdr/AgDR-0005-surrogate-monte-carlo-profile-mode.md).
+
+---
+
 ## Related repo docs
 
 - [AgDR-0004](../docs/agdr/AgDR-0004-maestro-pex-calibration-path.md) — Maestro PEX path (deterministic layout), separate from statistical MC.
+- [AgDR-0005](../docs/agdr/AgDR-0005-surrogate-monte-carlo-profile-mode.md) — Phase 4.5 surrogate MC profile mode.
 - Email to UMC support — certified Spectre version and official `mc_sp_*` procedure remain the long-term fix.
 
 ---

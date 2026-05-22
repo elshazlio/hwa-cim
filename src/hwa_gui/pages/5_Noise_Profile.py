@@ -44,8 +44,14 @@ st.caption(
     "Only **Monte Carlo CSV** is the thesis-grade statistical Phase 5 path."
 )
 
-tab_syn, tab_pex, tab_corner, tab_mc = st.tabs(
-    ["Synthetic", "Maestro PEX", "PEX corners", "Monte Carlo CSV"]
+tab_syn, tab_pex, tab_corner, tab_sur, tab_mc = st.tabs(
+    [
+        "Synthetic",
+        "Maestro PEX",
+        "PEX corners",
+        "Phase 4.5 Surrogate MC",
+        "Monte Carlo CSV",
+    ]
 )
 
 with tab_syn:
@@ -157,6 +163,75 @@ with tab_corner:
             detail, proxy = process_corner_runs(specs)
             st.dataframe(detail, use_container_width=True)
             st.dataframe(proxy, use_container_width=True)
+
+with tab_sur:
+    render_hardware_profile_banner("surrogate_mc")
+    st.markdown(
+        """
+**Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)**
+
+Parses wide VIVA exports from manual PDK delta-parameter sweeps. Sigma is estimated from
+FF/SS corner deltas (÷3), **not** foundry-certified UMC Monte Carlo.
+
+Outputs are thesis/plot artifacts — **not** the Phase 5 `input_code` noise profile schema.
+"""
+    )
+    sc1, sc2, sc3 = st.columns(3)
+    cap_csv = sc1.text_input(
+        "Cap sweep CSV",
+        value="stuff_from_cadence/manual_mc_2_var_cap_1.csv",
+        key="sur_cap",
+    )
+    dvth_csv = sc2.text_input(
+        "dvth0 sweep CSV",
+        value="stuff_from_cadence/manual_mc_4_var_1.csv",
+        key="sur_dvth",
+    )
+    sur_out = Path(sc3.text_input("Output base", value="results/surrogate_mc", key="sur_out"))
+    sur_t = st.number_input("Sample time (ns)", 0.0, 1e6, 200.25, key="sur_t")
+
+    if st.button("Run surrogate MC parser (both sweeps)", type="primary", key="sur_run"):
+        from hwa_cim.surrogate_mc import run_surrogate_mc
+
+        r = root()
+        try:
+            cap_r = run_surrogate_mc(
+                r / cap_csv,
+                r / sur_out / "cap_sweep",
+                sample_time_ns=float(sur_t),
+                variable_group="mom_cap_grid",
+                marker="mom_cap_grid",
+            )
+            dvth_r = run_surrogate_mc(
+                r / dvth_csv,
+                r / sur_out / "dvth0_sweep",
+                sample_time_ns=float(sur_t),
+                variable_group="dvth0_grid",
+                marker="dvth0_grid",
+            )
+            st.success("Phase 4.5 surrogate summaries written.")
+            st.json({"cap_sweep": cap_r.get("summary"), "dvth0_sweep": dvth_r.get("summary")})
+        except Exception as e:
+            st.error(str(e))
+
+    if st.button("Generate Phase 4.5 plots", key="sur_plots"):
+        from hwa_cim.plots import run_surrogate_mc_plots
+
+        try:
+            paths = run_surrogate_mc_plots(
+                surrogate_base=root() / sur_out,
+                sample_time_ns=float(sur_t),
+            )
+            st.success(f"Wrote {len(paths)} plot(s) under results/plots/03_surrogate_mc/")
+            for p in paths:
+                st.caption(str(p))
+        except Exception as e:
+            st.error(str(e))
+
+    cap_sum = root() / sur_out / "cap_sweep" / "surrogate_mc_summary.csv"
+    if cap_sum.is_file():
+        st.subheader("Cap sweep summary")
+        st.dataframe(pd.read_csv(cap_sum), use_container_width=True)
 
 with tab_mc:
     render_hardware_profile_banner("monte_carlo_csv")

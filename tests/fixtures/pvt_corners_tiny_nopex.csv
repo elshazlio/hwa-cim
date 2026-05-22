@@ -1,0 +1,5 @@
+"/OA_Charge (modelFiles=nom,VDD=1.1,temperature=27) X","/OA_Charge (modelFiles=nom,VDD=1.1,temperature=27) Y","/OA_Charge (modelFiles=l65sp_v132.lib.scs:ff_sp_lvt11,VDD=1.21,temperature=-40) X","/OA_Charge (modelFiles=l65sp_v132.lib.scs:ff_sp_lvt11,VDD=1.21,temperature=-40) Y"
+nom,ff,ff,ff
+0,0,0,0
+8e-10,0.827,8e-10,0.901
+2e-7,0.827,2e-7,0.901

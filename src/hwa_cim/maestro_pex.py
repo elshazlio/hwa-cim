@@ -38,6 +38,11 @@ class HardwareProfileInfo:
     profile_signal: Optional[str] = None
     profile_is_statistical: bool = False
     profile_warning: str = ""
+    phase_label: str = ""
+    profile_display_name: str = ""
+    profile_kind: str = ""
+    profile_is_foundry_certified: bool = False
+    sigma_source: str = ""
 
 
 HARDWARE_PROFILES: dict[str, HardwareProfileInfo] = {
@@ -70,6 +75,32 @@ HARDWARE_PROFILES: dict[str, HardwareProfileInfo] = {
         banner="Statistical Monte Carlo profile. This is the thesis-grade Phase 5 CSV path.",
         profile_is_statistical=True,
         profile_warning="Statistical MC noise profile from Cadence export",
+        phase_label="Phase 5",
+        profile_display_name="Foundry / statistical Monte Carlo CSV",
+        profile_kind="foundry_statistical_mc",
+        profile_is_foundry_certified=True,
+    ),
+    "surrogate_mc": HardwareProfileInfo(
+        mode="surrogate_mc",
+        badge="Phase 4.5 Surrogate MC",
+        banner=(
+            "Surrogate Monte Carlo with user-defined Gaussian parametric variation. "
+            "Not UMC-certified Monte Carlo; summaries are artifact/plot inputs until "
+            "code-indexed profiles exist."
+        ),
+        profile_signal="/OA_Charge",
+        profile_is_statistical=True,
+        profile_warning=(
+            "Surrogate MC with user-defined Gaussian parametric variation; "
+            "not UMC-certified Monte Carlo"
+        ),
+        phase_label="Phase 4.5",
+        profile_display_name=(
+            "Surrogate Monte Carlo with user-defined Gaussian parametric variation"
+        ),
+        profile_kind="user_defined_gaussian_parametric_surrogate_mc",
+        profile_is_foundry_certified=False,
+        sigma_source="corner_delta_div_3",
     ),
 }
 
@@ -77,13 +108,23 @@ HARDWARE_PROFILES: dict[str, HardwareProfileInfo] = {
 def hardware_profile_metrics_extra(mode: str) -> dict[str, Any]:
     """Fields to merge into HWA ``metrics.json``."""
     info = HARDWARE_PROFILES.get(mode, HARDWARE_PROFILES["synthetic"])
-    return {
+    extra: dict[str, Any] = {
         "hardware_profile_mode": info.mode,
         "hardware_profile_badge": info.badge,
         "profile_signal": info.profile_signal,
         "profile_is_statistical": info.profile_is_statistical,
         "profile_warning": info.profile_warning,
     }
+    if info.phase_label:
+        extra["phase_label"] = info.phase_label
+    if info.profile_display_name:
+        extra["profile_display_name"] = info.profile_display_name
+    if info.profile_kind:
+        extra["profile_kind"] = info.profile_kind
+    extra["profile_is_foundry_certified"] = info.profile_is_foundry_certified
+    if info.sigma_source:
+        extra["sigma_source"] = info.sigma_source
+    return extra
 
 
 def _normalize_signal(signal: str) -> str:

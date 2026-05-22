@@ -33,6 +33,8 @@ hwa-train-distill = "hwa_cim.train_distill:main"
 hwa-plot-thesis = "hwa_cim.plots:main_thesis_chart"
 hwa-plot-parasitic = "hwa_cim.plots:main_parasitic"
 hwa-maestro-pex = "hwa_cim.maestro_pex:main"
+hwa-surrogate-mc = "hwa_cim.surrogate_mc:main"
+hwa-plot-surrogate-mc = "hwa_cim.plots:main_surrogate_mc"
 
 [tool.setuptools.packages.find]
 where = ["src"]

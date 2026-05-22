@@ -1,0 +1,10 @@
+marker,signal,sample_time_ns,variable_group,sampled_v,header_label,umc_mc_d_c1_vp,umc_mc_d_cox_vp
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7429282237114524,"/OA_Charge (umc_mc_d_c1_vp=-0.067,umc_mc_d_cox_vp=-0.067)",-0.067,-0.067
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7429191017536596,"/OA_Charge (umc_mc_d_c1_vp=-0.067,umc_mc_d_cox_vp=0)",-0.067,0.0
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7429099799727719,"/OA_Charge (umc_mc_d_c1_vp=-0.067,umc_mc_d_cox_vp=0.067)",-0.067,0.067
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7554301378395191,"/OA_Charge (umc_mc_d_c1_vp=0,umc_mc_d_cox_vp=-0.067)",0.0,-0.067
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7554211608049415,"/OA_Charge (umc_mc_d_c1_vp=0,umc_mc_d_cox_vp=0)",0.0,0.0
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7554121838369448,"/OA_Charge (umc_mc_d_c1_vp=0,umc_mc_d_cox_vp=0.067)",0.0,0.067
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7667155300327435,"/OA_Charge (umc_mc_d_c1_vp=0.067,umc_mc_d_cox_vp=-0.067)",0.067,-0.067
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7667066971969839,"/OA_Charge (umc_mc_d_c1_vp=0.067,umc_mc_d_cox_vp=0)",0.067,0.0
+mom_cap_grid,/OA_Charge,200.25,mom_cap_grid,0.7666978645131612,"/OA_Charge (umc_mc_d_c1_vp=0.067,umc_mc_d_cox_vp=0.067)",0.067,0.067

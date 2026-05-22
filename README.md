@@ -19,6 +19,7 @@ The stack also supports an **optional schematic-style MAC model**: population-de
 | **2** | NoisyQuantLinear + γ noise (train mode), ADC STE, parasitic ladder plots | Yes (`hwa-eval-noisy`, `hwa-sweep-phase2`, `hwa-plot-parasitic`) |
 | **3** | HWA training (noise + clipping + STE); **hardware-aware forward on by default** (`--no-hardware-aware` to match pre-change behavior) | Yes (`hwa-train-hwa`, `hwa-sweep-hwa`) |
 | **4** | Teacher–student distillation + noisy student (same `--no-hardware-aware` flag) | Yes (`hwa-train-distill`) |
+| **4.5** | **Surrogate Monte Carlo** (user-defined Gaussian parametric variation) — wide VIVA sweep parser + thesis plots | Yes (`hwa-surrogate-mc`, `hwa-plot-surrogate-mc`; **AgDR-0005**) — **not** final Phase 5 |
 | **5** | Real noise profile from **PEX + Monte Carlo** → CSV → `--noise-mode csv` | Hook implemented; **waiting on hardware MC export** |
 | **PEX cal** | Pre-MC **deterministic** gain from Maestro `/OA_Charge` (not a σ noise profile) | Yes (`hwa-maestro-pex`; **AgDR-0004**) — **does not replace Phase 5** |
 
@@ -114,7 +115,7 @@ hwa-train-distill --no-hardware-aware ...
 
 ## Dashboard (optional)
 
-The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Hardware profiles** (synthetic, Maestro PEX, corners, Phase 5 MC CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
+The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Hardware profiles** (synthetic, Maestro PEX, corners, **Phase 4.5 surrogate MC**, Phase 5 MC CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
 
 ```bash
 hwa-dashboard
@@ -145,6 +146,31 @@ Console scripts are defined in `pyproject.toml`; after install they are on `PATH
 | **Fig** Thesis bars | `hwa-plot-thesis --baseline-dir … --hwa-checkpoint …/best.pt [--noisy-eval-json …]` | Middle proxy uses **`int4_ptq_test_accuracy_ideal`**, then legacy `int4_ptq_test_accuracy` / `int8_ptq_test_accuracy` if present. |
 | **Fig** Parasitic | `hwa-plot-parasitic --out results/figures/parasitic_sweep.png` | MOM-oriented sweep **0–20%** (`--pdk-marker` optional). |
 | **PEX cal** | `hwa-maestro-pex --manifest config/maestro_pex.yaml --write-calibration config/calibration_pex.yaml` | PNGs under `results/maestro_pex/figures/`; **not** Phase 5 MC (AgDR-0004). |
+| **4.5 Surrogate MC** | `hwa-surrogate-mc --all-defaults` | Parses wide VIVA sweeps → `results/surrogate_mc/`; **not** UMC-certified MC (AgDR-0005). |
+| **4.5 Plots** | `hwa-plot-surrogate-mc` | PNGs under `results/plots/03_surrogate_mc/`. |
+
+### Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)
+
+**What this is:** A **stopgap between PEX calibration and true Phase 5**. Native UMC Monte Carlo was blocked; the team ran **TT models** with **user-defined Gaussian/grid perturbations** of PDK delta parameters (`umc_mc_dvth0_*`, `umc_mc_d_c1_vp`, …). Sigma is estimated from FF/SS corner deltas (÷3), not foundry-certified mismatch statistics.
+
+**What this is not:**
+
+- **Not** Phase 5 / `--noise-mode csv` (summaries lack per-`input_code` statistical profiles).
+- **Not** UMC-certified Monte Carlo.
+- **Not** proof that surrogate σ should drive HWA training today (Run → Phase 4.5 mode records provenance with **synthetic** γ only).
+
+**Typical workflow:**
+
+```bash
+hwa-surrogate-mc --all-defaults
+hwa-plot-surrogate-mc
+```
+
+Curated figures: `results/plots/03_surrogate_mc/` (dvth0 vs MOM cap spread, MOM cap sweep, PVT/PEX corner bars). Source CSVs: `stuff_from_cadence/manual_mc_*.csv`, `no_pex_oa_only_3_corners.csv`, `with_pex_oa_only_3_corners.csv`. Cadence flow: `monte_carlo_debugging/ADE_MAESTRO_MANUAL_MC.md`.
+
+**Thesis wording (short):** *Phase 4.5 surrogate Monte Carlo with user-defined Gaussian parametric variation characterizes `/OA_Charge` sensitivity to MOM capacitance and threshold deltas; foundry statistical Phase 5 remains a separate CSV path.*
+
+See **AgDR-0005** and `background_info/Surrogate_MC_Phase5_Readiness_Report.md`.
 
 **Phase 5 (hardware CSV):**
 
@@ -206,6 +232,7 @@ See **AgDR-0004** and `docs/software_mission_followups.md`.
 | **Parasitic plot marker** | Default **~17%** (`INTEGRATED_OPERATING_POINT`) is a **heuristic** from sparse G_eff, not extracted PDK silicon. | Do not cite as measured INL corner. |
 | **Phase 5 CSV** | Per-code σ interpolation; extended columns optional. | Full MC + PEX closure still hardware-owned. |
 | **Maestro PEX path** | `/OA_Charge` sample → scaled `g_eff`; PNGs in `results/maestro_pex/figures/`. | **Not** a noise profile; **not** MNIST accuracy uplift vs schematic HWA in our runs; no power model. |
+| **Phase 4.5 surrogate** | Wide VIVA parser + spread/sweep plots; `profile_kind` in summary CSV. | **Not** foundry MC; **not** `NoiseProfileCSV` without `input_code`. |
 | **8 verified vectors** | Test stub **skipped** until mV ↔ software scaling is agreed (`tests/test_verified_vectors.py`). | Do not use draft roadmap conversion as regression. |
 | **INT4 metrics** | Phase 1 reports **`int4_ptq_test_accuracy_ideal`** and **`…_hardware`** separately. | A single “INT4 accuracy” without the suffix is ambiguous. |
 
@@ -221,6 +248,8 @@ See **AgDR-0004** and `docs/software_mission_followups.md`.
 | `results/phase2_sweep/` | `gamma_sweep.csv`, `.json` |
 | `results/figures/` | `thesis_bars.png` (FP32 / INT4+noise / HWA — **not** PEX-isolated bars), `parasitic_sweep.png`, optional `pex_hwa_honest_comparison.png` |
 | `results/maestro_pex/` | `maestro_pex_summary.csv`, `maestro_pex_metrics.json`, `figures/*.png` |
+| `results/surrogate_mc/` | Phase 4.5 per-sweep points + summary CSV/JSON (`cap_sweep`, `dvth0_sweep`, `pvt_pex_corners`) |
+| `results/plots/03_surrogate_mc/` | Surrogate sensitivity, MOM cap sweep, PVT/PEX corner bars (see `results/plots/README.md`) |
 | `results/run_hwa_pex_calibrated/` | Example HWA run with `calibration_pex.yaml` + `hardware_profile_mode: maestro_pex` |
 
 If Matplotlib warns about a non-writable config dir (e.g. CI), set:
@@ -238,7 +267,7 @@ mkdir -p "$MPLCONFIGDIR"
 
 **Cadence (Virtuoso) schematic:** The team target is **UMC 65 nm** full-custom **SRAM CiM**: **4×4** array, **decoder**, **DAC**, and **SAR ADC** integrated at schematic level with **C-2C** charge-domain MAC; the **SAR comparator** is currently an **ideal library** block for schedule, to be swapped for **full custom** later. **Software** uses **MOMCAPS_SY_MMKF**-style defaults for the **parasitic ladder toy model** (`src/hwa_cim/c2c.py`); see `background_info/HWA_Training_Pipeline_Plan.md` for MOM vs MIM notes.
 
-**This repository** consumes **simulation-derived CSV** (μ, σ, codes) for **Phase 5** statistical noise — not raw VIVA waveforms as a σ profile. **Maestro PEX** (`hwa-maestro-pex`) is a **deterministic gain bridge** from `/OA_Charge` until that MC CSV exists; it does not close Phase 5. Pre-layout **gain/offset** knobs (`hardware_aware`) mirror schematic verification numbers; **Monte Carlo on PEX** remains the thesis-grade noise path. Roadmap: **`background_info/Bird's Eye View of Our Thesis.md`**. Follow-ups: **`docs/software_mission_followups.md`**.
+**This repository** consumes **simulation-derived CSV** (μ, σ, codes) for **Phase 5** statistical noise — not raw VIVA waveforms as a σ profile. **Maestro PEX** (`hwa-maestro-pex`) is a **deterministic gain bridge** from `/OA_Charge`. **Phase 4.5** (`hwa-surrogate-mc`) parses **wide VIVA surrogate sweeps** for thesis sensitivity and PVT/PEX corner evidence — labeled *Surrogate Monte Carlo with user-defined Gaussian parametric variation*, distinct from foundry MC. Pre-layout **gain/offset** knobs (`hardware_aware`) mirror schematic verification numbers; **Monte Carlo on PEX** with per-code exports remains the thesis-grade Phase 5 path. Roadmap: **`background_info/Bird's Eye View of Our Thesis.md`**. Follow-ups: **`docs/software_mission_followups.md`**.
 
 ---
 

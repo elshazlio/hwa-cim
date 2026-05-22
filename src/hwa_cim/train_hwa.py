@@ -242,7 +242,13 @@ def main() -> None:
     )
     ap.add_argument(
         "--hardware-profile-mode",
-        choices=("synthetic", "maestro_pex", "pex_corner_proxy", "monte_carlo_csv"),
+        choices=(
+            "synthetic",
+            "maestro_pex",
+            "pex_corner_proxy",
+            "surrogate_mc",
+            "monte_carlo_csv",
+        ),
         default=None,
         help="Metadata for metrics.json (inferred from noise/calibration if omitted)",
     )

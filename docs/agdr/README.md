@@ -26,3 +26,4 @@ Use four-digit zero-padded IDs. The next free number is **one higher than the la
 | [AgDR-0002](AgDR-0002-streamlit-navigation-and-sidebar-labels.md) | Streamlit navigation and sidebar labels | executed |
 | [AgDR-0003](AgDR-0003-yaml-calibration-and-csv-noise.md) | YAML MAC calibration and richer CSV noise | executed |
 | [AgDR-0004](AgDR-0004-maestro-pex-calibration-path.md) | Maestro PEX calibration path separate from MC CSV | executed |
+| [AgDR-0005](AgDR-0005-surrogate-monte-carlo-profile-mode.md) | Phase 4.5 surrogate MC (user-defined Gaussian parametric variation) | executed |
