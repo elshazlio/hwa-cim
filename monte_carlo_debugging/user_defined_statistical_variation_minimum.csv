@@ -1,0 +1,5 @@
+name,distribution_type,std,range_n,global_var_default,enabled,notes
+umc_mc_dvth0_n_splvt,Gaussian,0.009,3,0,yes,SPLVT NMOS; sigma ~ |corner dvth0|/3 from l65sp_v132_mc.lib.scs
+umc_mc_dvth0_p_splvt,Gaussian,0.006,3,0,yes,SPLVT PMOS
+umc_mc_dvth0_n_sphvt,Gaussian,0.006,3,0,yes,SPHVT NMOS precharge
+umc_mc_dvth0_p_sphvt,Gaussian,0.006,3,0,yes,SPHVT PMOS precharge

@@ -1,0 +1,77 @@
+//*************************************************************************************
+// UMC L65SP v132 — manual mismatch / MC bypass wrapper (local, not a UMC release file)
+//
+// Purpose:
+//   Load TT device models WITHOUT mc_sp_* or *_statistical_p (encrypted MC engine).
+//   Map ADE design variables (prefix umc_mc_*) onto PDK delta parameters (dvth0_*, etc.).
+//
+// Use with:
+//   ADE Assembler parametric sweep — see monte_carlo_debugging/ADE_MAESTRO_MANUAL_MC.md
+//
+// Requirements:
+//   - l65sp_v132_mc.lib.scs must be on the Spectre include path (standard UMC65 PDK setup).
+//   - Do NOT also include mc_sp_lvt11, mc_sp_hvt11, or mc_65_momcaps in Model Libraries.
+//   - Sigma values for sweeps come from UMC mismatch spec (not from FF/SS corners).
+//
+// Post-layout: comment out the cctg_pre_simu includes below (pre-layout C_cctg only).
+//*************************************************************************************
+
+simulator lang=spectre insensitive=yes
+
+// tt_sp_* / tt_65_momcaps sections already declare dvth0_*, du0_*, etc.
+// Remaps below override those with ADE umc_mc_* variables — allow later wins.
+manualMcOptions options redefinedparams=ignore
+
+// --- TT model sections (same as PDK tt_sp_* aggregators, no statistical_p) -----------
+include "l65sp_v132_mc.lib.scs" section=tt_sp_lvt11
+include "l65sp_v132_mc.lib.scs" section=tt_sp_hvt11
+include "l65sp_v132_mc.lib.scs" section=tt_65_momcaps
+
+// --- ADE sweep variables → PDK parameters (defaults = TT / zero) --------------------
+// SPLVT (SRAM core) — primary mismatch knobs
+parameters dvth0_n_11_splvt=umc_mc_dvth0_n_splvt
+parameters dvth0_p_11_splvt=umc_mc_dvth0_p_splvt
+parameters du0_n_11_splvt=umc_mc_du0_n_splvt
+parameters du0_p_11_splvt=umc_mc_du0_p_splvt
+parameters dtoxe_n_11_splvt=umc_mc_dtoxe_n_splvt
+parameters dtoxe_p_11_splvt=umc_mc_dtoxe_p_splvt
+parameters dtoxp_n_11_splvt=umc_mc_dtoxp_n_splvt
+parameters dtoxp_p_11_splvt=umc_mc_dtoxp_p_splvt
+parameters dxl_n_11_splvt=umc_mc_dxl_n_splvt
+parameters dxl_p_11_splvt=umc_mc_dxl_p_splvt
+parameters dxw_n_11_splvt=umc_mc_dxw_n_splvt
+parameters dxw_p_11_splvt=umc_mc_dxw_p_splvt
+
+// SPHVT (precharge) — primary mismatch knobs
+parameters dvth0_n_11_sphvt=umc_mc_dvth0_n_sphvt
+parameters dvth0_p_11_sphvt=umc_mc_dvth0_p_sphvt
+parameters du0_n_11_sphvt=umc_mc_du0_n_sphvt
+parameters du0_p_11_sphvt=umc_mc_du0_p_sphvt
+parameters dtoxe_n_11_sphvt=umc_mc_dtoxe_n_sphvt
+parameters dtoxe_p_11_sphvt=umc_mc_dtoxe_p_sphvt
+
+// MOM capacitors
+parameters d_c1_vp=umc_mc_d_c1_vp
+parameters d_cox_vp=umc_mc_d_cox_vp
+
+// Optional: declare defaults when variables are not supplied by ADE (TT = 0)
+// Uncomment if you run Spectre outside ADE without design-variable injection:
+// parameters umc_mc_dvth0_n_splvt=0 umc_mc_dvth0_p_splvt=0
+// parameters umc_mc_du0_n_splvt=0 umc_mc_du0_p_splvt=0
+// parameters umc_mc_dtoxe_n_splvt=0 umc_mc_dtoxe_p_splvt=0
+// parameters umc_mc_dtoxp_n_splvt=0 umc_mc_dtoxp_p_splvt=0
+// parameters umc_mc_dxl_n_splvt=0 umc_mc_dxl_p_splvt=0
+// parameters umc_mc_dxw_n_splvt=0 umc_mc_dxw_p_splvt=0
+// parameters umc_mc_dvth0_n_sphvt=0 umc_mc_dvth0_p_sphvt=0
+// parameters umc_mc_du0_n_sphvt=0 umc_mc_du0_p_sphvt=0
+// parameters umc_mc_dtoxe_n_sphvt=0 umc_mc_dtoxe_p_sphvt=0
+// parameters umc_mc_d_c1_vp=0 umc_mc_d_cox_vp=0
+
+// Extended SPLVT deltas (enable in ADE if you expand the sweep)
+// parameters dvsat_n_11_splvt=umc_mc_dvsat_n_splvt
+// parameters dvsat_p_11_splvt=umc_mc_dvsat_p_splvt
+// parameters drdsw_n_11_splvt=umc_mc_drdsw_n_splvt
+// parameters drdsw_p_11_splvt=umc_mc_drdsw_p_splvt
+// parameters dcf_n_11_splvt=umc_mc_dcf_n_splvt
+// parameters dcf_p_11_splvt=umc_mc_dcf_p_splvt
+// ... see tt_sp_lvt11_corner in l65sp_v132_mc.lib.scs for full list

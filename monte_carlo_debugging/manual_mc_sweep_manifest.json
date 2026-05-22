@@ -1,0 +1,33 @@
+{
+  "description": "Parametric TT mismatch sweep via umc65_manual_mc.scs (not UMC certified MC).",
+  "generator": "generate_manual_mc_sweep.py",
+  "n_random": 50,
+  "seed": 42,
+  "n_rows_total": 54,
+  "clip_sigma": 3.0,
+  "sigma_placeholder_1sigma": {
+    "umc_mc_dvth0_n_splvt": 0.003,
+    "umc_mc_dvth0_p_splvt": 0.002,
+    "umc_mc_du0_n_splvt": 0.00125,
+    "umc_mc_du0_p_splvt": 0.00125,
+    "umc_mc_dtoxe_n_splvt": 1e-10,
+    "umc_mc_dtoxe_p_splvt": 1e-10,
+    "umc_mc_dtoxp_n_splvt": 1e-10,
+    "umc_mc_dtoxp_p_splvt": 1e-10,
+    "umc_mc_dxl_n_splvt": 1.6e-09,
+    "umc_mc_dxl_p_splvt": 1.6e-09,
+    "umc_mc_dxw_n_splvt": 3e-09,
+    "umc_mc_dxw_p_splvt": 3e-09,
+    "umc_mc_dvth0_n_sphvt": 0.002,
+    "umc_mc_dvth0_p_sphvt": 0.002,
+    "umc_mc_du0_n_sphvt": 0.001,
+    "umc_mc_du0_p_sphvt": 0.001,
+    "umc_mc_dtoxe_n_sphvt": 8e-11,
+    "umc_mc_dtoxe_p_sphvt": 8e-11,
+    "umc_mc_d_c1_vp": 0.01,
+    "umc_mc_d_cox_vp": 0.01
+  },
+  "ade_import_file": "manual_mc_sweep.csv",
+  "ade_run_mode": "Points (each row = one simulation)",
+  "thesis_label": "parametric mismatch sweep at TT using PDK delta parameters"
+}

@@ -1,0 +1,15 @@
+name,distribution_type,std,range_n,global_var_default,enabled,notes
+umc_mc_dvth0_n_splvt,Gaussian,0.009,3,0,yes,SPLVT NMOS
+umc_mc_dvth0_p_splvt,Gaussian,0.006,3,0,yes,SPLVT PMOS
+umc_mc_dvth0_n_sphvt,Gaussian,0.006,3,0,yes,SPHVT NMOS
+umc_mc_dvth0_p_sphvt,Gaussian,0.006,3,0,yes,SPHVT PMOS
+umc_mc_du0_n_splvt,Gaussian,0.0004,3,0,yes,SPLVT NMOS mobility
+umc_mc_du0_p_splvt,Gaussian,0.00015,3,0,yes,SPLVT PMOS mobility
+umc_mc_du0_n_sphvt,Gaussian,0.0006,3,0,yes,SPHVT NMOS mobility
+umc_mc_du0_p_sphvt,Gaussian,0.0004,3,0,yes,SPHVT PMOS mobility
+umc_mc_dtoxe_n_splvt,Gaussian,3.3e-11,3,0,yes,SPLVT NMOS tox
+umc_mc_dtoxe_p_splvt,Gaussian,3.3e-11,3,0,yes,SPLVT PMOS tox
+umc_mc_dtoxe_n_sphvt,Gaussian,3.3e-11,3,0,yes,SPHVT NMOS tox
+umc_mc_dtoxe_p_sphvt,Gaussian,3.3e-11,3,0,yes,SPHVT PMOS tox
+umc_mc_d_c1_vp,Gaussian,0.067,3,0,yes,MOM d_c1; corner +/-0.20 / 3
+umc_mc_d_cox_vp,Gaussian,0.067,3,0,yes,MOM d_cox; corner +/-0.20 / 3
