@@ -1,0 +1,2 @@
+marker,signal,sample_time_ns,nopex_csv,pex_csv,nopex_v,pex_v,delta_v,relative_gain,delta_max_v,delta_rms_v,calibration_warnings
+current_inference_vector,/OA_Charge,200.25,/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/nopex1.csv,/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/pex1.csv,0.8274353274673941,0.7554211608049415,-0.07201416666245264,0.9129670147359155,0.2672853360102688,0.07821614216274671,[]

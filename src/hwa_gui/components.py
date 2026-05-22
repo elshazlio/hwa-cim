@@ -6,6 +6,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from hwa_cim.maestro_pex import HARDWARE_PROFILES, HardwareProfileInfo
 from hwa_gui.paths import project_root
 
 
@@ -52,7 +53,7 @@ def pipeline_quick_reference_md() -> str:
 | **2** | **Run** → Noisy eval or Γ sweep | `noisy_eval.json` and/or CSV under `results/phase2_sweep/` |
 | **3** | **Run** → HWA train (or HWA sweep) | `results/run_hwa/best.pt`, `metrics.json` |
 | **4** | **Run** → Distill (optional) | `results/run_distill/…` |
-| **5** | **Noise profile** page | Validate CSV; then **Run** → HWA with noise mode **csv** |
+| **5** | **Hardware profiles** page | Synthetic / Maestro PEX / corners / MC CSV; then **Run** → HWA |
 | **Figures** | **Run** → Thesis / Parasitic **or** **Charts** | PNGs or interactive Plotly |
 
 **Partial runs:** each step reads checkpoints or metrics from disk. Stop after any step, open **Results** or **Compare**, then pick the next tab when you return—nothing is tied to a browser session except the one **running job** on the Run page.
@@ -109,6 +110,28 @@ def health_banner() -> None:
     c1.metric("Project root", str(r))
     c2.metric("MNIST data folder", "found" if data_ok else "missing (will download)")
     c3.metric("GPU for training", "choose `cuda` in Run if installed")
+
+
+def hardware_profile_info(mode: str) -> HardwareProfileInfo:
+    return HARDWARE_PROFILES.get(mode, HARDWARE_PROFILES["synthetic"])
+
+
+def render_hardware_profile_banner(mode: str) -> None:
+    """Visible mode banner so PEX calibration is not confused with Monte Carlo."""
+    info = hardware_profile_info(mode)
+    st.info(f"**{info.badge}** — {info.banner}")
+
+
+def hardware_profile_badge_from_metrics(metrics: dict) -> str:
+    """Badge label for Results / Compare from saved ``metrics.json``."""
+    if metrics.get("hardware_profile_badge"):
+        return str(metrics["hardware_profile_badge"])
+    mode = metrics.get("hardware_profile_mode", "")
+    if mode:
+        return hardware_profile_info(str(mode)).badge
+    if metrics.get("noise_mode") == "csv":
+        return HARDWARE_PROFILES["monte_carlo_csv"].badge
+    return HARDWARE_PROFILES["synthetic"].badge
 
 
 def confirm_overwrite(out_dir: Path) -> bool:

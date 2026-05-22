@@ -7,7 +7,9 @@ This list ties the **`hwa-cim`** codebase to the **hardware + AFM** story in `ba
 - Consider a **small optional model** (threshold noise, kickback, or meta-stability probability) in the forward path or in **ADC STE** — only if Spectre exports justify it; default can stay off.
 - Re-run **Phase 2 / 3** baselines and add an **AgDR** if training semantics change.
 
-## Phase 5 — real noise (PEX + Monte Carlo)
+## Phase 5 — real noise (Monte Carlo CSV)
+
+**Blocker:** Spectre (or equivalent) **Monte Carlo on PEX** → export with `input_code`, `ideal_output`, `mean_output`, `sigma` (and optional extended columns). **`hwa-maestro-pex` does not satisfy this** — it only scales deterministic MAC gain from a single `/OA_Charge` sample (AgDR-0004).
 
 - **`noise.py`:** Replace **`sigma_mean`** summarization with **per-code** (and optionally per **weight-population** class) σ injection when the CSV schema grows — already sketched in `background_info/HWA_CIM_Required_Changes.md`.
 - **Regression:** Add tests that load a **tiny fixture CSV** and assert deterministic noise shaping (golden tensors or bounds).
@@ -26,6 +28,7 @@ This list ties the **`hwa-cim`** codebase to the **hardware + AFM** story in `ba
 
 - Ensure **Streamlit Run** presets and **README** quick start mention **dual INT4 metrics** and **`--no-hardware-aware`** where relevant (already in CLI table).
 - Commit **frozen sweep JSON/CSV** for thesis figures when runs stabilize (reproducibility).
+- **Maestro PEX:** use `results/maestro_pex/figures/` for analog waveforms; do not fold into `thesis_bars.png` unless a new **PEX-only eval** story is defined and measured.
 
 ## Inter-array power (not this repo)
 

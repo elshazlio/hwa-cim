@@ -5,6 +5,7 @@ from __future__ import annotations
 import torch.nn as nn
 
 from hwa_cim.layers import NoisyQuantLinear
+from hwa_cim.noise import NoiseProfileCSV
 
 
 class MicroMLP(nn.Module):
@@ -41,6 +42,7 @@ class NoisyMicroMLP(nn.Module):
         adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
+        noise_profile: NoiseProfileCSV | None = None,
         hardware_aware: bool = False,
         g_eff_sparse: float | None = None,
         g_eff_dense: float | None = None,
@@ -56,6 +58,7 @@ class NoisyMicroMLP(nn.Module):
             adc_bits=adc_bits,
             noise_mode=noise_mode,
             sigma_global=sigma_global,
+            noise_profile=noise_profile,
             hardware_aware=hardware_aware,
             g_eff_sparse=g_eff_sparse,
             g_eff_dense=g_eff_dense,

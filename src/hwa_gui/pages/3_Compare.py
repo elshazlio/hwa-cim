@@ -16,7 +16,12 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
+from hwa_gui.components import (
+    apply_page_style,
+    hardware_profile_badge_from_metrics,
+    render_pipeline_sidebar,
+    root,
+)
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
@@ -47,7 +52,11 @@ rows: list[dict] = []
 for p in choices:
     try:
         d = json.loads(p.read_text(encoding="utf-8"))
-        flat = {"run": str(p.relative_to(r)), **{k: d[k] for k in d}}
+        flat = {
+            "run": str(p.relative_to(r)),
+            "profile_badge": hardware_profile_badge_from_metrics(d),
+            **{k: d[k] for k in d},
+        }
         rows.append(flat)
     except Exception as e:
         rows.append({"run": str(p), "error": str(e)})

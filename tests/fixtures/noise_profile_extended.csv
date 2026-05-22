@@ -1,0 +1,5 @@
+input_code,weight_population,ideal_output,mean_output,sigma,CSNR_dB,g_eff_measured,offset_measured
+0,0,0.0,0.001,0.01,40.0,0.62,0.0
+64,4,0.25,0.248,0.015,38.0,0.61,0.02
+128,8,0.5,0.502,0.02,36.0,0.52,0.03
+255,12,1.0,0.998,0.025,35.0,0.44,0.05

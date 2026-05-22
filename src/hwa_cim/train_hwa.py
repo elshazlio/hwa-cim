@@ -11,6 +11,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+from hwa_cim.config import load_mac_calibration
+from hwa_cim.maestro_pex import hardware_profile_metrics_extra
 from hwa_cim.data import get_mnist_loaders
 from hwa_cim.evaluate import accuracy
 from hwa_cim.models import NoisyMicroMLP
@@ -71,18 +73,22 @@ def run_hwa_train(
     device: str = "cpu",
     noise_mode: str = "synthetic",
     noise_profile: Path | None = None,
+    calibration_yaml: Path | None = None,
     eval_noisy_seeds: int = 10,
     hardware_aware: bool = True,
+    hardware_profile_mode: str | None = None,
 ) -> dict:
     """Phase 3 HWA training. Returns metrics dict."""
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    mac = load_mac_calibration(calibration_yaml)
     sigma_global = None
+    profile_obj: NoiseProfileCSV | None = None
     if noise_mode == "csv":
         if not noise_profile:
             raise ValueError("--noise-profile required when noise_mode is csv")
-        profile = NoiseProfileCSV.load(noise_profile)
-        sigma_global = profile.sigma_mean
+        profile_obj = NoiseProfileCSV.load(noise_profile)
+        sigma_global = profile_obj.sigma_mean
 
     torch.manual_seed(seed)
     dev = torch.device(device)
@@ -95,7 +101,9 @@ def run_hwa_train(
         adc_bits=4,
         noise_mode=noise_mode,
         sigma_global=sigma_global,
+        noise_profile=profile_obj,
         hardware_aware=hardware_aware,
+        **mac.noisy_layer_kwargs(),
     ).to(dev)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     crit = nn.CrossEntropyLoss()
@@ -123,6 +131,15 @@ def run_hwa_train(
     model.train()
     final_noisy_mean, final_noisy_std = accuracy_noisy(model, test_loader, dev, eval_noisy_seeds)
 
+    profile_mode = hardware_profile_mode
+    if profile_mode is None:
+        if noise_mode == "csv":
+            profile_mode = "monte_carlo_csv"
+        elif calibration_yaml and "calibration_pex" in str(calibration_yaml):
+            profile_mode = "maestro_pex"
+        else:
+            profile_mode = "synthetic"
+
     metrics = {
         "gamma": gamma,
         "alpha_clip": alpha,
@@ -132,6 +149,9 @@ def run_hwa_train(
         "final_noisy_std": final_noisy_std,
         "noise_mode": noise_mode,
         "noise_profile": str(noise_profile) if noise_profile else None,
+        "calibration_yaml": str(calibration_yaml) if calibration_yaml else None,
+        "mac_calibration": mac.c2c_kwargs(),
+        **hardware_profile_metrics_extra(profile_mode),
     }
     save_json(out_dir / "metrics.json", metrics)
     save_checkpoint(out_dir / "best.pt", model, extra={"metrics": metrics, "phase": 3})
@@ -148,8 +168,10 @@ def run_hwa_sweep(
     seed: int = 42,
     device: str = "cpu",
     hardware_aware: bool = True,
+    calibration_yaml: Path | None = None,
 ) -> dict:
     """Grid sweep over gamma x alpha; writes CSV/JSON under out_dir."""
+    mac = load_mac_calibration(calibration_yaml)
     out_dir.mkdir(parents=True, exist_ok=True)
     gammas = [0.01, 0.02, 0.04]
     alphas = [2.0, 3.0, 4.0]
@@ -162,7 +184,11 @@ def run_hwa_sweep(
     for g in gammas:
         for a in alphas:
             model = NoisyMicroMLP(
-                gamma=g, alpha_clip=a, use_adc=True, hardware_aware=hardware_aware
+                gamma=g,
+                alpha_clip=a,
+                use_adc=True,
+                hardware_aware=hardware_aware,
+                **mac.noisy_layer_kwargs(),
             ).to(dev)
             opt = torch.optim.Adam(model.parameters(), lr=lr)
             for _ in range(epochs):
@@ -202,11 +228,23 @@ def main() -> None:
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--noise-mode", choices=("synthetic", "csv"), default="synthetic")
     ap.add_argument("--noise-profile", type=Path, default=None)
+    ap.add_argument(
+        "--calibration-yaml",
+        type=Path,
+        default=None,
+        help="MAC gain/offset YAML (default: config/calibration.yaml in repo)",
+    )
     ap.add_argument("--eval-noisy-seeds", type=int, default=10)
     ap.add_argument(
         "--no-hardware-aware",
         action="store_true",
         help="Disable schematic gain/offset in NoisyQuantLinear (legacy training path)",
+    )
+    ap.add_argument(
+        "--hardware-profile-mode",
+        choices=("synthetic", "maestro_pex", "pex_corner_proxy", "monte_carlo_csv"),
+        default=None,
+        help="Metadata for metrics.json (inferred from noise/calibration if omitted)",
     )
     args = ap.parse_args()
     run_hwa_train(
@@ -221,8 +259,10 @@ def main() -> None:
         device=args.device,
         noise_mode=args.noise_mode,
         noise_profile=args.noise_profile,
+        calibration_yaml=args.calibration_yaml,
         eval_noisy_seeds=args.eval_noisy_seeds,
         hardware_aware=not args.no_hardware_aware,
+        hardware_profile_mode=args.hardware_profile_mode,
     )
 
 
@@ -240,6 +280,7 @@ def main_sweep() -> None:
         action="store_true",
         help="Disable schematic gain/offset in NoisyQuantLinear",
     )
+    ap.add_argument("--calibration-yaml", type=Path, default=None)
     args = ap.parse_args()
     run_hwa_sweep(
         data_dir=args.data_dir,
@@ -250,6 +291,7 @@ def main_sweep() -> None:
         seed=args.seed,
         device=args.device,
         hardware_aware=not args.no_hardware_aware,
+        calibration_yaml=args.calibration_yaml,
     )
 
 

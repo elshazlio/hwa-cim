@@ -14,10 +14,13 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+from hwa_cim.maestro_pex import DEFAULT_PEX_CALIBRATION
+
 from hwa_gui.components import (
     apply_page_style,
     confirm_overwrite,
     pipeline_quick_reference_md,
+    render_hardware_profile_banner,
     render_pipeline_sidebar,
     root,
 )
@@ -215,11 +218,32 @@ with tab4:
     with st.expander("What this does & prerequisites", expanded=False):
         st.markdown(
             """
-**Does:** noise-aware training (synthetic noise or **Phase 5** CSV profile).
+**Does:** noise-aware training with a **hardware profile** (synthetic, Maestro PEX calibration, corner proxy, or Phase 5 MC CSV).
 
-**Needs:** MNIST data. For **csv** noise mode, validate the file on **Noise profile** first, then paste its path here.
+**Needs:** MNIST data. For **Maestro PEX**, run **Hardware profiles → Maestro PEX** first. For **MC CSV**, validate on **Hardware profiles → Monte Carlo CSV**.
 """
         )
+    profile_labels = [
+        "Synthetic AFM Noise",
+        "Maestro PEX Calibration",
+        "PEX Corner Proxy",
+        "True Monte Carlo CSV",
+    ]
+    profile_to_mode = {
+        "Synthetic AFM Noise": "synthetic",
+        "Maestro PEX Calibration": "maestro_pex",
+        "PEX Corner Proxy": "pex_corner_proxy",
+        "True Monte Carlo CSV": "monte_carlo_csv",
+    }
+    hw_profile_label = st.selectbox(
+        "Hardware profile mode",
+        profile_labels,
+        index=0,
+        key="h_profile",
+    )
+    hw_mode = profile_to_mode[hw_profile_label]
+    render_hardware_profile_banner(hw_mode)
+
     c1, c2 = st.columns(2)
     data_dir = Path(c1.text_input("Data dir", value="data", key="h_data"))
     out_dir = Path(c2.text_input("Output dir", value="results/run_hwa", key="h_out"))
@@ -235,19 +259,61 @@ with tab4:
     eval_seeds = c9.number_input("Eval noisy seeds", 1, 50, 10, key="h_es")
     c10, c11 = st.columns(2)
     device = c10.selectbox("Device", ["cpu", "cuda"], key="h_dev")
-    noise_mode = c11.selectbox("Noise mode", ["synthetic", "csv"], key="h_nm")
-    noise_profile = st.text_input(
-        "Noise profile CSV (required if csv)", value="", key="h_np"
+    cal_yaml = c11.text_input(
+        "Calibration YAML",
+        value="config/calibration.yaml",
+        key="h_cal",
+        help="Maestro PEX mode defaults to config/calibration_pex.yaml when left as schematic default.",
     )
+    noise_profile = st.text_input(
+        "Noise / corner profile CSV",
+        value="",
+        key="h_np",
+        help="MC CSV for True Monte Carlo; corner_proxy_noise_profile.csv for PEX Corner Proxy.",
+    )
+    if hw_mode == "maestro_pex":
+        st.caption(
+            f"Uses synthetic noise + PEX calibration. Generate `{DEFAULT_PEX_CALIBRATION.name}` "
+            "via **Hardware profiles → Maestro PEX** or `hwa-maestro-pex --write-calibration`."
+        )
     if st.button("Run HWA train", type="primary", key="h_run"):
         od = root() / out_dir
         np_path = Path(noise_profile) if noise_profile.strip() else None
+        r = root()
+
+        if hw_mode == "monte_carlo_csv" and not np_path:
+            st.error("True Monte Carlo CSV mode requires a noise profile CSV path.")
+            st.stop()
+        if hw_mode == "pex_corner_proxy":
+            if not np_path:
+                np_path = r / "results/maestro_pex/corner_proxy_noise_profile.csv"
+            if not np_path.is_file():
+                st.error(
+                    "PEX Corner Proxy needs corner_proxy_noise_profile.csv — "
+                    "generate corners on **Hardware profiles → PEX corners** first."
+                )
+                st.stop()
+
+        if hw_mode == "synthetic":
+            noise_mode = "synthetic"
+            cal_path = r / cal_yaml if cal_yaml.strip() else None
+        elif hw_mode == "maestro_pex":
+            noise_mode = "synthetic"
+            cal_path = r / DEFAULT_PEX_CALIBRATION
+            if not cal_path.is_file() and cal_yaml.strip():
+                cal_path = r / cal_yaml
+        elif hw_mode == "pex_corner_proxy":
+            noise_mode = "csv"
+            cal_path = r / cal_yaml if cal_yaml.strip() else None
+        else:
+            noise_mode = "csv"
+            cal_path = r / cal_yaml if cal_yaml.strip() else None
 
         def _go() -> None:
             from hwa_cim.train_hwa import run_hwa_train
 
             run_hwa_train(
-                data_dir=root() / data_dir,
+                data_dir=r / data_dir,
                 out_dir=od,
                 epochs=int(epochs),
                 batch_size=int(batch),
@@ -257,8 +323,10 @@ with tab4:
                 seed=int(seed),
                 device=device,
                 noise_mode=noise_mode,
-                noise_profile=(root() / np_path) if np_path else None,
+                noise_profile=(r / np_path) if np_path else None,
+                calibration_yaml=cal_path,
                 eval_noisy_seeds=int(eval_seeds),
+                hardware_profile_mode=hw_mode,
             )
 
         _maybe_start("HWA train", od, _go)

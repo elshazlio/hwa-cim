@@ -1,0 +1,27 @@
+source: maestro_pex
+profile_warning: Deterministic PEX calibration only; not Monte Carlo
+profile_is_statistical: false
+profile_signal: /OA_Charge
+relative_gain_mean: 0.9129670147359155
+mac:
+  g_eff_sparse: 0.5660395491362675
+  g_eff_dense: 0.40170548648380283
+  offset_dense_v: 0.05
+  population_sparse_max: 4
+  population_dense_min: 12
+ladder:
+  integrated_operating_point: 0.17
+maestro_pex_runs:
+- marker: current_inference_vector
+  signal: /OA_Charge
+  sample_time_ns: 200.25
+  nopex_csv: /Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/nopex1.csv
+  pex_csv: /Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/pex1.csv
+  nopex_v: 0.8274353274673941
+  pex_v: 0.7554211608049415
+  delta_v: -0.07201416666245264
+  relative_gain: 0.9129670147359155
+  delta_max_v: 0.2672853360102688
+  delta_rms_v: 0.07821614216274671
+  calibration_warnings: []
+calibration_warnings: []

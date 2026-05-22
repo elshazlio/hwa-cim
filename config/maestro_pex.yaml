@@ -1,0 +1,21 @@
+# Maestro / VIVA PEX waveform manifest (see AgDR-0004, hwa-maestro-pex).
+# Paths are relative to the repository root unless absolute.
+
+runs:
+  - marker: current_inference_vector
+    nopex_csv: stuff_from_cadence/nopex1.csv
+    pex_csv: stuff_from_cadence/pex1.csv
+    signal: /OA_Charge
+    # 200.0 ns hits a zero-crossing on current exports; ~200.25 ns is near the OA_Charge peak.
+    sample_time_ns: 200.25
+    input_code: null
+    weight_population: null
+    ideal_output_v: null
+
+# Uncomment when multiple PEX corners share the same stimulus and sample time:
+# corner_runs:
+#   - marker: vector_a
+#     corner: tt_27c_1v1
+#     pex_csv: path/to/tt.csv
+#     signal: /OA_Charge
+#     sample_time_ns: 200.0

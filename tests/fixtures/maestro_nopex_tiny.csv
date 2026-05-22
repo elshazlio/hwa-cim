@@ -1,0 +1,5 @@
+/OA_Charge (Design_Point=1) X,/OA_Charge (Design_Point=1) Y,/Read_Out_1 (Design_Point=1) X,/Read_Out_1 (Design_Point=1) Y
+0,1.0,0,9.0
+1e-7,2.0,0,8.0
+2e-7,3.0,0,7.0
+3e-7,4.0,0,6.0

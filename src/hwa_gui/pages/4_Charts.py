@@ -38,6 +38,9 @@ kind = st.selectbox(
         "Parasitic sweep",
         "Gamma sweep (CSV)",
         "HWA sweep (CSV)",
+        "Maestro OA_Charge overlay",
+        "Maestro OA_Charge delta",
+        "Maestro calibration summary",
         "Thesis bars",
     ],
     index=0,
@@ -68,6 +71,48 @@ elif kind == "HWA sweep (CSV)":
         st.plotly_chart(figure_hwa_sweep_csv(p), use_container_width=True)
     else:
         st.info("Run HWA sweep first, or adjust the path.")
+
+elif kind == "Maestro OA_Charge overlay":
+    from hwa_gui.plotly_charts import figure_maestro_oa_charge_overlay
+
+    c1, c2 = st.columns(2)
+    nopex = c1.text_input("No-PEX CSV", value="stuff_from_cadence/nopex1.csv", key="ch_mp_n")
+    pex = c2.text_input("PEX CSV", value="stuff_from_cadence/pex1.csv", key="ch_mp_p")
+    if (root() / nopex).is_file() and (root() / pex).is_file():
+        st.plotly_chart(
+            figure_maestro_oa_charge_overlay(root() / nopex, root() / pex),
+            use_container_width=True,
+        )
+    else:
+        st.info("Adjust paths to Maestro/VIVA exports.")
+
+elif kind == "Maestro OA_Charge delta":
+    from hwa_gui.plotly_charts import figure_maestro_oa_charge_delta
+
+    c1, c2 = st.columns(2)
+    nopex = c1.text_input("No-PEX CSV", value="stuff_from_cadence/nopex1.csv", key="ch_md_n")
+    pex = c2.text_input("PEX CSV", value="stuff_from_cadence/pex1.csv", key="ch_md_p")
+    if (root() / nopex).is_file() and (root() / pex).is_file():
+        st.plotly_chart(
+            figure_maestro_oa_charge_delta(root() / nopex, root() / pex),
+            use_container_width=True,
+        )
+    else:
+        st.info("Adjust paths to Maestro/VIVA exports.")
+
+elif kind == "Maestro calibration summary":
+    from hwa_gui.plotly_charts import figure_maestro_summary_csv
+
+    path = st.text_input(
+        "maestro_pex_summary.csv",
+        value="results/maestro_pex/maestro_pex_summary.csv",
+        key="ch_ms",
+    )
+    p = root() / path
+    if p.is_file():
+        st.plotly_chart(figure_maestro_summary_csv(p), use_container_width=True)
+    else:
+        st.info("Run `hwa-maestro-pex` or **Hardware profiles → Maestro PEX** first.")
 
 else:
     from hwa_gui.plotly_charts import figure_thesis_three_bar

@@ -7,7 +7,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from hwa_cim.c2c import compute_g_eff, compute_offset
-from hwa_cim.noise import additive_weight_noise, additive_weight_noise_sigma
+from hwa_cim.noise import (
+    NoiseProfileCSV,
+    additive_weight_noise,
+    additive_weight_noise_sigma,
+    noisy_forward_from_profile,
+)
 from hwa_cim.quantization import clip_weights_by_std, fake_quantize_int4_ste, symmetric_quantize_int4
 
 
@@ -41,6 +46,7 @@ class NoisyQuantLinear(nn.Module):
         adc_bits: int = 4,
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
+        noise_profile: NoiseProfileCSV | None = None,
         hardware_aware: bool = False,
         g_eff_sparse: float | None = None,
         g_eff_dense: float | None = None,
@@ -57,6 +63,7 @@ class NoisyQuantLinear(nn.Module):
         self.adc_bits = adc_bits
         self.noise_mode = noise_mode
         self.sigma_global = sigma_global
+        self.noise_profile = noise_profile
         self.hardware_aware = hardware_aware
         self._g_eff_sparse = g_eff_sparse
         self._g_eff_dense = g_eff_dense
@@ -73,14 +80,19 @@ class NoisyQuantLinear(nn.Module):
         if self.training and (
             self.gamma > 0
             or (self.sigma_global is not None and self.sigma_global > 0)
+            or (self.noise_mode == "csv" and self.noise_profile is not None)
         ):
-            if self.noise_mode == "csv" and self.sigma_global is not None and self.sigma_global > 0:
+            if self.noise_mode == "csv" and self.noise_profile is not None:
+                w_noisy = self.noise_profile.apply_weight_noise(w_q)
+            elif self.noise_mode == "csv" and self.sigma_global is not None and self.sigma_global > 0:
                 w_noisy = additive_weight_noise_sigma(w_q, self.sigma_global)
             else:
                 w_noisy = additive_weight_noise(w_q, self.gamma)
         else:
             w_noisy = w_q
         y = F.linear(x, w_noisy, b)
+        if self.training and self.noise_mode == "csv" and self.noise_profile is not None:
+            y = noisy_forward_from_profile(y, self.noise_profile)
         if self.hardware_aware:
             w_pop_q, _ = symmetric_quantize_int4(w)
             g_eff = compute_g_eff(

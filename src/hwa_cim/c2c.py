@@ -21,6 +21,9 @@ OFFSET_DENSE_V = 50e-3
 POPULATION_SPARSE_MAX = 4
 POPULATION_DENSE_MIN = 12
 
+# Heuristic parasitic ratio for integrated sparse G_eff (~0.62); plot marker only — not silicon.
+INTEGRATED_OPERATING_POINT = 0.17
+
 
 def _popcount_low4(abs_w: torch.Tensor) -> torch.Tensor:
     """Popcount of magnitude in lower 4 bits (INT4 abs range 0..8)."""

@@ -92,7 +92,7 @@ def _navigation_pages():
         st.Page(_PAGES / "2_Results.py", title="Results", icon="📁"),
         st.Page(_PAGES / "3_Compare.py", title="Compare", icon="⚖️"),
         st.Page(_PAGES / "4_Charts.py", title="Charts", icon="📊"),
-        st.Page(_PAGES / "5_Noise_Profile.py", title="Noise profile", icon="🎚️"),
+        st.Page(_PAGES / "5_Noise_Profile.py", title="Hardware profiles", icon="🎚️"),
     ]
 
 

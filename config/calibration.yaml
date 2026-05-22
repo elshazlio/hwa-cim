@@ -1,0 +1,13 @@
+# Schematic-level MAC calibration (pre-layout). See AgDR-0001 / AgDR-0003.
+# Override path: hwa-train-hwa --calibration-yaml path/to/custom.yaml
+
+mac:
+  g_eff_sparse: 0.62
+  g_eff_dense: 0.44
+  offset_dense_v: 0.05          # volts (~50 mV dense-regime residual)
+  population_sparse_max: 4
+  population_dense_min: 12
+
+ladder:
+  # Heuristic parasitic ratio for integrated sparse G_eff (~0.62); not a measured PDK corner.
+  integrated_operating_point: 0.17

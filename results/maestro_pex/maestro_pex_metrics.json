@@ -1,0 +1,33 @@
+{
+  "manifest": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/config/maestro_pex.yaml",
+  "signal": "/OA_Charge",
+  "sample_time_ns": 200.25,
+  "n_runs": 1,
+  "n_corner_runs": 0,
+  "summary_csv": "results/maestro_pex/maestro_pex_summary.csv",
+  "delta_max_v": 0.2672853360102688,
+  "delta_rms_v": 0.07821614216274671,
+  "profile_is_statistical": false,
+  "profile_warning": "Deterministic PEX calibration from Maestro/VIVA; not Monte Carlo",
+  "read_out_signals_ignored": true,
+  "warnings": [
+    "Read_Out_* columns are ignored (inference testbench; read mode / sense amp inactive).",
+    "This path does not replace Phase 5 --noise-mode csv Monte Carlo training."
+  ],
+  "summary_rows": [
+    {
+      "marker": "current_inference_vector",
+      "signal": "/OA_Charge",
+      "sample_time_ns": 200.25,
+      "nopex_csv": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/nopex1.csv",
+      "pex_csv": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/pex1.csv",
+      "nopex_v": 0.8274353274673941,
+      "pex_v": 0.7554211608049415,
+      "delta_v": -0.07201416666245264,
+      "relative_gain": 0.9129670147359155,
+      "delta_max_v": 0.2672853360102688,
+      "delta_rms_v": 0.07821614216274671,
+      "calibration_warnings": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "gamma": 0.02,
+  "alpha_clip": 3.0,
+  "hardware_aware": true,
+  "final_clean_accuracy": 0.9702,
+  "final_noisy_mean": 0.9702,
+  "final_noisy_std": 0.0,
+  "noise_mode": "synthetic",
+  "noise_profile": null,
+  "calibration_yaml": "config/calibration_pex.yaml",
+  "mac_calibration": {
+    "g_eff_sparse": 0.5660395491362675,
+    "g_eff_dense": 0.40170548648380283,
+    "offset_dense_v": 0.05,
+    "population_sparse_max": 4,
+    "population_dense_min": 12
+  },
+  "hardware_profile_mode": "maestro_pex",
+  "hardware_profile_badge": "PEX calibrated",
+  "profile_signal": "/OA_Charge",
+  "profile_is_statistical": false,
+  "profile_warning": "Deterministic PEX calibration only; not Monte Carlo"
+}

@@ -15,7 +15,12 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from hwa_gui.components import apply_page_style, render_pipeline_sidebar, root
+from hwa_gui.components import (
+    apply_page_style,
+    hardware_profile_badge_from_metrics,
+    render_pipeline_sidebar,
+    root,
+)
 from hwa_gui.paths import project_root
 
 os.chdir(project_root())
@@ -41,6 +46,10 @@ st.subheader("metrics.json")
 pick = st.selectbox("Select run", options=mfiles, format_func=lambda p: str(p.relative_to(r)))
 if pick and pick.exists():
     data = json.loads(pick.read_text(encoding="utf-8"))
+    badge = hardware_profile_badge_from_metrics(data)
+    st.markdown(f"**Hardware profile:** `{badge}`")
+    if data.get("profile_warning"):
+        st.caption(data["profile_warning"])
     st.json(data)
 
 st.subheader("Checkpoints & artifacts")

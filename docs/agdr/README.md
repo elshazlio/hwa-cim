@@ -9,7 +9,7 @@ This directory holds **Agent Decision Records** for the Thesis HW Codesign / **h
 
 `AgDR-{NNNN}-{short-kebab-title}.md`
 
-Use four-digit zero-padded IDs. The next free number is **one higher than the largest existing `AgDR-NNNN`** (**0003** after AgDR-0002).
+Use four-digit zero-padded IDs. The next free number is **one higher than the largest existing `AgDR-NNNN`** (**0005** after AgDR-0004).
 
 ## Workflow
 
@@ -24,3 +24,5 @@ Use four-digit zero-padded IDs. The next free number is **one higher than the la
 |----|--------|--------|
 | [AgDR-0001](AgDR-0001-hardware-aware-mac-calibration.md) | Hardware-aware MAC calibration in software | executed |
 | [AgDR-0002](AgDR-0002-streamlit-navigation-and-sidebar-labels.md) | Streamlit navigation and sidebar labels | executed |
+| [AgDR-0003](AgDR-0003-yaml-calibration-and-csv-noise.md) | YAML MAC calibration and richer CSV noise | executed |
+| [AgDR-0004](AgDR-0004-maestro-pex-calibration-path.md) | Maestro PEX calibration path separate from MC CSV | executed |

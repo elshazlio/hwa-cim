@@ -20,6 +20,7 @@ The stack also supports an **optional schematic-style MAC model**: population-de
 | **3** | HWA training (noise + clipping + STE); **hardware-aware forward on by default** (`--no-hardware-aware` to match pre-change behavior) | Yes (`hwa-train-hwa`, `hwa-sweep-hwa`) |
 | **4** | Teacher–student distillation + noisy student (same `--no-hardware-aware` flag) | Yes (`hwa-train-distill`) |
 | **5** | Real noise profile from **PEX + Monte Carlo** → CSV → `--noise-mode csv` | Hook implemented; **waiting on hardware MC export** |
+| **PEX cal** | Pre-MC **deterministic** gain from Maestro `/OA_Charge` (not a σ noise profile) | Yes (`hwa-maestro-pex`; **AgDR-0004**) — **does not replace Phase 5** |
 
 The same phase order is exposed as tabs on the Streamlit **Run** page; see [`GUI_RUN.md`](GUI_RUN.md).
 
@@ -113,7 +114,7 @@ hwa-train-distill --no-hardware-aware ...
 
 ## Dashboard (optional)
 
-The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Noise profile** (Phase 5 CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
+The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Hardware profiles** (synthetic, Maestro PEX, corners, Phase 5 MC CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
 
 ```bash
 hwa-dashboard
@@ -143,6 +144,7 @@ Console scripts are defined in `pyproject.toml`; after install they are on `PATH
 | **4** Distill | `hwa-train-distill --out-dir results/run_distill` | Teacher + noisy student. **`--no-hardware-aware`** supported. |
 | **Fig** Thesis bars | `hwa-plot-thesis --baseline-dir … --hwa-checkpoint …/best.pt [--noisy-eval-json …]` | Middle proxy uses **`int4_ptq_test_accuracy_ideal`**, then legacy `int4_ptq_test_accuracy` / `int8_ptq_test_accuracy` if present. |
 | **Fig** Parasitic | `hwa-plot-parasitic --out results/figures/parasitic_sweep.png` | MOM-oriented sweep **0–20%** (`--pdk-marker` optional). |
+| **PEX cal** | `hwa-maestro-pex --manifest config/maestro_pex.yaml --write-calibration config/calibration_pex.yaml` | PNGs under `results/maestro_pex/figures/`; **not** Phase 5 MC (AgDR-0004). |
 
 **Phase 5 (hardware CSV):**
 
@@ -150,7 +152,62 @@ Console scripts are defined in `pyproject.toml`; after install they are on `PATH
 hwa-train-hwa --noise-mode csv --noise-profile path/to/mc_profile.csv --out-dir results/run_hwa_mc ...
 ```
 
-The loader expects columns such as `input_code`, `ideal_output`, `mean_output`, `sigma` (see `src/hwa_cim/noise.py`). Training currently summarizes **`sigma`** via **`sigma_mean`** for injection scale — tighten this when richer per-code statistics are needed.
+The loader expects columns such as `input_code`, `ideal_output`, `mean_output`, `sigma` (see `src/hwa_cim/noise.py`). With **`--noise-mode csv`**, training uses **per-code σ** on weights (nearest `input_code`) and on layer outputs when a profile is loaded. Optional columns: `weight_population`, `g_eff_measured`, `offset_measured`.
+
+**MAC calibration YAML** (gain/offset defaults, plot operating point):
+
+```bash
+hwa-train-hwa --calibration-yaml config/calibration.yaml ...
+```
+
+Default file: [`config/calibration.yaml`](config/calibration.yaml). Override knobs without editing `src/hwa_cim/c2c.py` (see **AgDR-0003**).
+
+### Maestro PEX calibration (pre-MC bridge — not a noise profile)
+
+**What this is:** A **stopgap until Monte Carlo CSV exists**. Cadence Maestro/VIVA **no-PEX vs PEX** waveforms sample **`/OA_Charge`** at a manifest time and scale schematic MAC gains (`calibration_pex.yaml`). Training still uses **`--noise-mode synthetic`** (γ noise), not per-code σ from PEX.
+
+**What this is not:**
+
+- **Not** Phase 5 / `--noise-mode csv` (no `input_code`, `mean_output`, `sigma` table from MC).
+- **Not** proof that “PEX hurt accuracy and HWA fixed it” on MNIST — `hwa-plot-thesis` stays **FP32 → INT4+noise (no HWA) → HWA**; it has no “PEX-only degradation” bar.
+- **Not** power (W) or energy — only analog voltage / effective gain.
+
+**Typical workflow:**
+
+```bash
+hwa-maestro-pex \
+  --manifest config/maestro_pex.yaml \
+  --out-dir results/maestro_pex \
+  --write-calibration config/calibration_pex.yaml
+
+hwa-train-hwa \
+  --calibration-yaml config/calibration_pex.yaml \
+  --noise-mode synthetic \
+  --hardware-profile-mode maestro_pex \
+  --gamma 0.02 --alpha 3.0 \
+  --out-dir results/run_hwa_pex_calibrated
+```
+
+**What we observed (example run, γ=0.02):** noisy test accuracy **~93.9%** without HWA (Phase 2 on baseline checkpoint) → **~97.1%** with schematic HWA → **~97.0%** with PEX-calibrated HWA (essentially flat vs schematic HWA). PEX/no-PEX at 200.25 ns gave **relative_gain ≈ 0.91** on `/OA_Charge`. Use Maestro figures for **layout analog evidence**; cite ML gains from HWA vs no-HWA, not from PEX calibration alone.
+
+**Thesis wording (short):** *Pre-MC Maestro PEX calibrates deterministic post-layout gain from `/OA_Charge` (inference testbench; read mode inactive). Statistical noise-aware training awaits Monte Carlo export to Phase 5 CSV.*
+
+See **AgDR-0004** and `docs/software_mission_followups.md`.
+
+---
+
+## Limitations (read before citing numbers)
+
+| Topic | What the repo does | What it is *not* |
+| ----- | ------------------ | ---------------- |
+| **Ideal vs hardware MAC** | `c2c_mac(..., hardware_aware=False)` matches dequant linear; parity test uses ideal only. | Not a SPICE netlist. |
+| **HWA training forward** | `NoisyQuantLinear` uses float `F.linear` + INT4 popcount gain/offset (AgDR-0001), not integer `c2c_mac` in the backward path. | Not cycle-accurate tile MAC. |
+| **Gain/offset model** | Row-wise population average over INT4 magnitudes; constants from schematic notes. | Not per-tile layout-accurate until refined. |
+| **Parasitic plot marker** | Default **~17%** (`INTEGRATED_OPERATING_POINT`) is a **heuristic** from sparse G_eff, not extracted PDK silicon. | Do not cite as measured INL corner. |
+| **Phase 5 CSV** | Per-code σ interpolation; extended columns optional. | Full MC + PEX closure still hardware-owned. |
+| **Maestro PEX path** | `/OA_Charge` sample → scaled `g_eff`; PNGs in `results/maestro_pex/figures/`. | **Not** a noise profile; **not** MNIST accuracy uplift vs schematic HWA in our runs; no power model. |
+| **8 verified vectors** | Test stub **skipped** until mV ↔ software scaling is agreed (`tests/test_verified_vectors.py`). | Do not use draft roadmap conversion as regression. |
+| **INT4 metrics** | Phase 1 reports **`int4_ptq_test_accuracy_ideal`** and **`…_hardware`** separately. | A single “INT4 accuracy” without the suffix is ambiguous. |
 
 ---
 
@@ -162,7 +219,9 @@ The loader expects columns such as `input_code`, `ideal_output`, `mean_output`, 
 | `results/run_hwa/` | HWA checkpoint, `metrics.json` (includes `hardware_aware`) |
 | `results/run_distill/` | Teacher/student checkpoints, `metrics.json` (includes `hardware_aware`) |
 | `results/phase2_sweep/` | `gamma_sweep.csv`, `.json` |
-| `results/figures/` | `thesis_bars.png`, `parasitic_sweep.png` |
+| `results/figures/` | `thesis_bars.png` (FP32 / INT4+noise / HWA — **not** PEX-isolated bars), `parasitic_sweep.png`, optional `pex_hwa_honest_comparison.png` |
+| `results/maestro_pex/` | `maestro_pex_summary.csv`, `maestro_pex_metrics.json`, `figures/*.png` |
+| `results/run_hwa_pex_calibrated/` | Example HWA run with `calibration_pex.yaml` + `hardware_profile_mode: maestro_pex` |
 
 If Matplotlib warns about a non-writable config dir (e.g. CI), set:
 
@@ -179,7 +238,7 @@ mkdir -p "$MPLCONFIGDIR"
 
 **Cadence (Virtuoso) schematic:** The team target is **UMC 65 nm** full-custom **SRAM CiM**: **4×4** array, **decoder**, **DAC**, and **SAR ADC** integrated at schematic level with **C-2C** charge-domain MAC; the **SAR comparator** is currently an **ideal library** block for schedule, to be swapped for **full custom** later. **Software** uses **MOMCAPS_SY_MMKF**-style defaults for the **parasitic ladder toy model** (`src/hwa_cim/c2c.py`); see `background_info/HWA_Training_Pipeline_Plan.md` for MOM vs MIM notes.
 
-**This repository** still consumes **simulation-derived CSV** (μ, σ, codes) for Phase 5 — not raw PEX — unless you add parsers. Pre-layout **gain/offset** knobs (`hardware_aware`) mirror schematic verification numbers; **PEX + Monte Carlo** replace them for thesis-grade claims. Roadmap and checklist: **`background_info/Bird's Eye View of Our Thesis.md`**. Software vs hardware gaps: **`docs/software_mission_followups.md`**.
+**This repository** consumes **simulation-derived CSV** (μ, σ, codes) for **Phase 5** statistical noise — not raw VIVA waveforms as a σ profile. **Maestro PEX** (`hwa-maestro-pex`) is a **deterministic gain bridge** from `/OA_Charge` until that MC CSV exists; it does not close Phase 5. Pre-layout **gain/offset** knobs (`hardware_aware`) mirror schematic verification numbers; **Monte Carlo on PEX** remains the thesis-grade noise path. Roadmap: **`background_info/Bird's Eye View of Our Thesis.md`**. Follow-ups: **`docs/software_mission_followups.md`**.
 
 ---
 

@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from hwa_cim.config import load_mac_calibration
 from hwa_cim.data import get_mnist_loaders
 from hwa_cim.evaluate import accuracy
 from hwa_cim.models import MicroMLP, NoisyMicroMLP, TeacherMLP
@@ -94,8 +95,10 @@ def run_distill(
     seed: int = 42,
     device: str = "cpu",
     hardware_aware: bool = True,
+    calibration_yaml: Path | None = None,
 ) -> dict:
     """Phase 4 distillation. Returns metrics dict."""
+    mac = load_mac_calibration(calibration_yaml)
     out_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(seed)
     dev = torch.device(device)
@@ -115,6 +118,7 @@ def run_distill(
         alpha_clip=alpha_clip,
         use_adc=True,
         hardware_aware=hardware_aware,
+        **mac.noisy_layer_kwargs(),
     ).to(dev)
     opt = torch.optim.Adam(student.parameters(), lr=lr)
 
@@ -176,6 +180,7 @@ def main() -> None:
         action="store_true",
         help="Disable schematic gain/offset in NoisyQuantLinear",
     )
+    ap.add_argument("--calibration-yaml", type=Path, default=None)
     args = ap.parse_args()
     run_distill(
         data_dir=args.data_dir,
@@ -192,6 +197,7 @@ def main() -> None:
         seed=args.seed,
         device=args.device,
         hardware_aware=not args.no_hardware_aware,
+        calibration_yaml=args.calibration_yaml,
     )
 
 
