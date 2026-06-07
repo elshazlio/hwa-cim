@@ -1,6 +1,8 @@
-# HWA-CiM: Hardware-Aware Training (MNIST)
+# SRAM HWA Hybrid AI
 
-Software pipeline for **charge-domain SRAM compute-in-memory** research aligned with **Analog Foundation Models** (AFM)–style training [Rasch et al., 2025]: a small **micro-MLP** on **MNIST**, **INT4** weights, **unsigned 4-bit activations**, **4-bit ADC** modeling per linear layer, and **synthetic Gaussian weight noise** (γ · max|W|) until **Phase 5**, when a **Monte Carlo CSV** from Cadence can drive HWA training.
+**Repository:** [`sram-hwa-hybrid-ai`](https://github.com/elshazlio/sram-hwa-hybrid-ai) · **Python package:** `hwa-cim` (`pip install -e .`)
+
+Hardware-aware (**HWA**) training pipeline for **hybrid (analog + digital) SRAM AI acceleration**: **charge-domain C-2C compute-in-memory**, aligned with **Analog Foundation Models** (AFM)–style training [Rasch et al., 2025]. A small **micro-MLP** on **MNIST** uses **INT4** weights, **unsigned 4-bit activations**, **4-bit ADC** modeling per linear layer, and **synthetic Gaussian weight noise** (γ · max|W|) until **Phase 5**, when a **Monte Carlo CSV** from Cadence can drive HWA training.
 
 The stack also supports an **optional schematic-style MAC model**: population-dependent **effective gain** and a **dense-regime offset** on top of ideal INT4 multiply–accumulate (`c2c_mac(..., hardware_aware=True)`), wired into **HWA training** by default (`hwa-train-hwa` / `hwa-train-distill`) while **Phase 2 noisy eval** stays on the legacy path unless you opt in. See **`docs/agdr/AgDR-0001-hardware-aware-mac-calibration.md`** for the decision record.
 
@@ -8,6 +10,32 @@ The stack also supports an **optional schematic-style MAC model**: population-de
 **Streamlit lab (GUI) — install, tour, partial runs:** [`GUI_RUN.md`](GUI_RUN.md)  
 **Agent Decision Records (architecture / calibration choices):** [`docs/agdr/README.md`](docs/agdr/README.md)  
 **Software vs hardware roadmap (follow-ups):** [`docs/software_mission_followups.md`](docs/software_mission_followups.md)
+
+---
+
+## HWA system architecture
+
+Teacher–student distillation with **surrogate Monte Carlo RC stress** injected in the PyTorch training loop (INT4 student, ADC-modeled layers). Weights converge to tolerate **UMC 65 nm** non-idealities.
+
+![HWA system architecture — teacher model, surrogate MC RC model, and noise-resilient student](hwa_system_arch.png)
+
+*Inspired by Julian Büchel et al., “Analog Foundation Models,” arXiv:2505.09663, Oct. 2025.*
+
+---
+
+## Key results (MNIST micro-MLP)
+
+Under the same Cadence-derived RC stress profile, HWA training recovers most of the accuracy lost to INT4 quantization + noise (vs. FP32 baseline).
+
+![Test accuracy — FP32 baseline, INT4 + RC stress, HWA under same Cadence stress](hwa_result.png)
+
+| Configuration | Test accuracy |
+| ------------- | ------------- |
+| FP32 (clean baseline) | 98.1% |
+| INT4 + RC stress (no HWA) | 93.9% |
+| HWA under same Cadence stress | 97.1% |
+
+Regenerate with `hwa-plot-thesis` (see [Quick start](#quick-start-recommended-order)).
 
 ---
 
@@ -55,7 +83,7 @@ If `cd` fails, **do not** run `pip install` yet — from your home directory, `p
 Example when the repo lives under `Documents` with spaces in the name (change the path if yours differs):
 
 ```bash
-cd "$HOME/Documents/My Projects/Thesis HW Codesign"
+cd "$HOME/Documents/My Projects/sram-hwa-hybrid-ai"
 ls pyproject.toml
 ```
 
@@ -74,7 +102,7 @@ On macOS you can also type `cd ` in Terminal, then **drag the project folder** i
 ## Setup — Windows (PowerShell)
 
 ```powershell
-cd "C:\Users\YOURNAME\Documents\Thesis HW Codesign"
+cd "C:\Users\YOURNAME\Documents\sram-hwa-hybrid-ai"
 Get-Item pyproject.toml
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -115,7 +143,7 @@ hwa-train-distill --no-hardware-aware ...
 
 ## Dashboard (optional)
 
-The **HWA-CiM Lab** is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Hardware profiles** (synthetic, Maestro PEX, corners, **Phase 4.5 surrogate MC**, Phase 5 MC CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
+The **SRAM HWA Lab** (`hwa-dashboard`) is a Streamlit front-end (`src/hwa_gui/`) around the same phases as the CLI: **Run** (tabbed jobs + live log), **Results**, **Compare**, **Charts** (Plotly), and **Hardware profiles** (synthetic, Maestro PEX, corners, **Phase 4.5 surrogate MC**, Phase 5 MC CSV). Sidebar page names (**Home**, **Run**, …) are declared in `Home.py` via **`st.navigation`** (see **AgDR-0002**); the built-in nav sits at the top of the sidebar, with progress ✓/○ hints below. Optional **`[gui]`** requires **Streamlit ≥ 1.52**.
 
 ```bash
 hwa-dashboard
@@ -278,6 +306,17 @@ pytest
 ```
 
 (`python -m pytest` works on all platforms; `pythonpath` is set in `pyproject.toml`.)
+
+---
+
+## Acknowledgments
+
+Several colleagues outside the thesis group contributed materially to this work:
+
+- **Eng. Mostafa** — SRAM validation and bring-up support that grounded the hardware track in measured behavior.
+- **Zainelabideen** — layout guidance and analog floorplanning that kept the UMC 65 nm SRAM CiM macro on a credible path to tape-out.
+
+Thank you both for the time, reviews, and practical help when the thesis team needed it most.
 
 ---
 
