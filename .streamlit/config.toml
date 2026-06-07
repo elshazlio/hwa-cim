@@ -13,7 +13,8 @@ font = "sans serif"
 showSidebarNavigation = true
 
 [server]
-headless = true
+# Open the default browser once the server is ready (see GUI_RUN.md).
+headless = false
 
 [browser]
 gatherUsageStats = false

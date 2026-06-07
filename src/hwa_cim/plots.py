@@ -408,7 +408,7 @@ def plot_surrogate_sensitivity_bars(
     ]
     spreads_mv = [dvth0_spread_v * 1000, cap_spread_v * 1000]
     colors = ["#94A3B8", "#0284C7"]
-    fig, ax = plt.subplots(figsize=(7.5, 4.8))
+    fig, ax = plt.subplots(figsize=(7.5, 5.0))
     x = np.arange(2)
     bars = ax.bar(x, spreads_mv, color=colors, width=0.55, edgecolor="white")
     ax.set_xticks(x, labels)
@@ -416,29 +416,44 @@ def plot_surrogate_sensitivity_bars(
     ax.set_title(f"/OA_Charge spread @ {sample_time_ns:g} ns (Phase 4.5 surrogate)")
     ax.grid(True, axis="y", alpha=0.3)
     ax.spines[["top", "right"]].set_visible(False)
+
+    ymax = max(spreads_mv) * 1.22
+    ax.set_ylim(0, ymax)
+    label_offset = max(0.6, ymax * 0.035)
+
     ratio = cap_spread_v / dvth0_spread_v if dvth0_spread_v > 0 else float("nan")
     for bar, val in zip(bars, spreads_mv):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
-            val + max(0.15, 0.04 * max(spreads_mv)),
+            val + label_offset,
             f"{val:.2f} mV",
             ha="center",
+            va="bottom",
             fontweight="bold",
+            fontsize=11,
         )
     if np.isfinite(ratio):
+        # Upper-left: empty over the short dvth0 bar (avoids clipping on tall MOM bar).
         ax.text(
-            0.5,
-            0.92,
+            0.02,
+            0.97,
             f"MOM cap / dvth0 spread ≈ {ratio:.1f}×",
             transform=ax.transAxes,
-            ha="center",
+            ha="left",
+            va="top",
             fontsize=10,
-            color="#334155",
+            color="#1E293B",
+            bbox={
+                "boxstyle": "round,pad=0.4",
+                "facecolor": "white",
+                "edgecolor": "#CBD5E1",
+                "alpha": 0.95,
+            },
         )
     fig.text(0.5, 0.02, PHASE45_FOOTER, ha="center", fontsize=8.5, color="#64748B")
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.tight_layout(rect=[0, 0.06, 1, 0.96])
+    fig.tight_layout(rect=[0, 0.07, 1, 0.98])
     fig.savefig(out_path, dpi=220)
     plt.close(fig)
 
@@ -481,6 +496,9 @@ def plot_mom_cap_sweep(
     plt.close(fig)
 
 
+_CORNER_DISPLAY_ORDER = ("nominal", "ff", "ss", "fnsp")
+
+
 def plot_pvt_pex_corner_bars(
     corner_df: pd.DataFrame,
     out_path: Path,
@@ -489,6 +507,9 @@ def plot_pvt_pex_corner_bars(
 ) -> None:
     """Grouped no-PEX vs PEX bars per PVT corner."""
     df = corner_df.copy()
+    order = {c: i for i, c in enumerate(_CORNER_DISPLAY_ORDER)}
+    df["_ord"] = df["corner"].astype(str).str.lower().map(lambda c: order.get(c, 99))
+    df = df.sort_values("_ord").drop(columns=["_ord"])
     labels = df["corner"].astype(str).tolist()
     x = np.arange(len(labels))
     w = 0.35
@@ -608,6 +629,100 @@ def run_surrogate_mc_plots(
         written.append(p3)
 
     return written
+
+
+def run_cadence_stress_recovery_plot(
+    *,
+    baseline_metrics: Path | dict,
+    stress_eval_json: Path | dict,
+    hwa_stress_metrics: Path | dict,
+    out_path: Path = Path(
+        "results/plots/05_cadence_stress/01_hwa_recovery_under_cadence_stress.png"
+    ),
+) -> Path:
+    """
+    Three-bar recovery under Cadence-informed surrogate stress (AgDR-0007).
+
+    Bars: clean FP32 baseline · baseline under stress · HWA under same stress.
+    """
+    if isinstance(baseline_metrics, Path):
+        baseline_metrics = load_json(baseline_metrics)
+    if isinstance(stress_eval_json, Path):
+        stress_eval_json = load_json(stress_eval_json)
+    if isinstance(hwa_stress_metrics, Path):
+        hwa_stress_metrics = load_json(hwa_stress_metrics)
+
+    fp32 = float(baseline_metrics.get("fp32_test_accuracy", 0.0))
+    baseline_stress = float(stress_eval_json.get("mean_accuracy", 0.0))
+    hwa_stress = float(hwa_stress_metrics.get("final_noisy_mean", 0.0))
+    sigma_rel = stress_eval_json.get("surrogate_sigma_rel")
+
+    labels = [
+        "FP32\n(clean baseline)",
+        "Baseline under\nCadence-informed stress",
+        "HWA under\nsame Cadence stress",
+    ]
+    vals = [fp32 * 100, baseline_stress * 100, hwa_stress * 100]
+    colors = ["#4C72B0", "#DD8452", "#55A868"]
+    y_lo, y_hi = thesis_bar_ylim_percent(vals)
+    label_offset = max(0.25, (y_hi - y_lo) * 0.04)
+
+    plt.figure(figsize=(8, 5))
+    x = np.arange(len(labels))
+    plt.bar(x, vals, color=colors, width=0.55)
+    plt.xticks(x, labels)
+    plt.ylabel("Test accuracy (%)")
+    title = "MNIST: HWA recovery under Cadence-informed surrogate stress"
+    if sigma_rel is not None:
+        title += f"\n(σ_rel ≈ {float(sigma_rel) * 100:.2f}%)"
+    plt.title(title)
+    plt.ylim(y_lo, y_hi)
+    plt.gca().set_yticks(np.arange(y_lo, y_hi + 0.01, 1.0))
+    for i, v in enumerate(vals):
+        plt.text(i, v + label_offset, f"{v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+    plt.grid(True, axis="y", alpha=0.3)
+    footer = "Phase 4.5; not foundry-certified Monte Carlo or final Phase 5"
+    plt.figtext(0.5, 0.01, footer, ha="center", fontsize=9, color="#64748b")
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.tight_layout(rect=[0, 0.04, 1, 1])
+    plt.savefig(out_path, dpi=200)
+    plt.close()
+    return out_path
+
+
+def main_cadence_stress() -> None:
+    p = argparse.ArgumentParser(description="Cadence-informed stress recovery figure")
+    p.add_argument(
+        "--baseline-metrics",
+        type=Path,
+        default=Path("results/run_baseline/metrics.json"),
+    )
+    p.add_argument(
+        "--stress-eval-json",
+        type=Path,
+        default=Path("results/run_baseline/noisy_eval_cadence_stress.json"),
+    )
+    p.add_argument(
+        "--hwa-metrics",
+        type=Path,
+        default=Path("results/run_hwa_cadence_stress/metrics.json"),
+    )
+    p.add_argument(
+        "--out",
+        type=Path,
+        default=Path(
+            "results/plots/05_cadence_stress/01_hwa_recovery_under_cadence_stress.png"
+        ),
+    )
+    args = p.parse_args()
+    path = run_cadence_stress_recovery_plot(
+        baseline_metrics=args.baseline_metrics,
+        stress_eval_json=args.stress_eval_json,
+        hwa_stress_metrics=args.hwa_metrics,
+        out_path=args.out,
+    )
+    print(f"Wrote {path}")
 
 
 def main_surrogate_mc() -> None:

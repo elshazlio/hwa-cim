@@ -1,6 +1,6 @@
 # SRAM HWA Hybrid AI
 
-**Repository:** [`sram-hwa-hybrid-ai`](https://github.com/elshazlio/sram-hwa-hybrid-ai) · **Python package:** `hwa-cim` (`pip install -e .`)
+**Repository:** [`hwa-cim`](https://github.com/elshazlio/hwa-cim) · **Python package:** `hwa-cim` (`pip install -e .`)
 
 Hardware-aware (**HWA**) training pipeline for **hybrid (analog + digital) SRAM AI acceleration**: **charge-domain C-2C compute-in-memory**, aligned with **Analog Foundation Models** (AFM)–style training [Rasch et al., 2025]. A small **micro-MLP** on **MNIST** uses **INT4** weights, **unsigned 4-bit activations**, **4-bit ADC** modeling per linear layer, and **synthetic Gaussian weight noise** (γ · max|W|) until **Phase 5**, when a **Monte Carlo CSV** from Cadence can drive HWA training.
 
@@ -83,7 +83,7 @@ If `cd` fails, **do not** run `pip install` yet — from your home directory, `p
 Example when the repo lives under `Documents` with spaces in the name (change the path if yours differs):
 
 ```bash
-cd "$HOME/Documents/My Projects/sram-hwa-hybrid-ai"
+cd "$HOME/Documents/My Projects/hwa-cim"
 ls pyproject.toml
 ```
 
@@ -102,7 +102,7 @@ On macOS you can also type `cd ` in Terminal, then **drag the project folder** i
 ## Setup — Windows (PowerShell)
 
 ```powershell
-cd "C:\Users\YOURNAME\Documents\sram-hwa-hybrid-ai"
+cd "C:\Users\YOURNAME\Documents\hwa-cim"
 Get-Item pyproject.toml
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1

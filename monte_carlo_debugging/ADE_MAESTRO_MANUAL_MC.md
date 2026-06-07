@@ -58,7 +58,7 @@ On the machine that runs Spectre (your lab server):
 
 ```bash
 # Example: copy into a stable path next to your testbench project
-cp "/path/to/Thesis HW Codesign/monte_carlo_debugging/umc65_manual_mc.scs" \
+cp "/path/to/hwa-cim/monte_carlo_debugging/umc65_manual_mc.scs" \
    "$HOME/umc65_manual_mc/umc65_manual_mc.scs"
 ```
 

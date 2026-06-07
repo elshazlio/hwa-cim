@@ -80,6 +80,25 @@ HARDWARE_PROFILES: dict[str, HardwareProfileInfo] = {
         profile_kind="foundry_statistical_mc",
         profile_is_foundry_certified=True,
     ),
+    "cadence_surrogate_stress": HardwareProfileInfo(
+        mode="cadence_surrogate_stress",
+        badge="Cadence stress",
+        banner=(
+            "Phase 4.5 — Cadence-informed surrogate stress. "
+            "Normalized /OA_Charge spread applied as relative output noise in HWA train/eval."
+        ),
+        profile_signal="/OA_Charge",
+        profile_is_statistical=True,
+        profile_warning=(
+            "Uses normalized /OA_Charge surrogate statistics; "
+            "not foundry Monte Carlo or final Phase 5"
+        ),
+        phase_label="Phase 4.5",
+        profile_display_name="Cadence-informed surrogate stress",
+        profile_kind="cadence_informed_surrogate_stress",
+        profile_is_foundry_certified=False,
+        sigma_source="sigma_output_over_mean_output",
+    ),
     "surrogate_mc": HardwareProfileInfo(
         mode="surrogate_mc",
         badge="Phase 4.5 Surrogate MC",

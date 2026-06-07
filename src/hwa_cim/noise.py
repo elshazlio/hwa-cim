@@ -46,6 +46,24 @@ def additive_weight_noise_sigma(
     return weight + sigma * noise
 
 
+def additive_relative_output_noise(
+    y: torch.Tensor,
+    sigma_rel: float,
+    generator: Optional[torch.Generator] = None,
+) -> torch.Tensor:
+    """
+    Gaussian output noise scaled by ``sigma_rel * max(|y|)`` (Cadence-informed stress).
+
+    Active in training mode only (caller responsibility). Models analog output uncertainty
+    after MAC shaping, not per-code weight mismatch.
+    """
+    if sigma_rel <= 0:
+        return y
+    scale = y.detach().abs().max().clamp(min=1e-8)
+    noise = torch.randn(y.shape, device=y.device, dtype=y.dtype, generator=generator)
+    return y + (sigma_rel * scale) * noise
+
+
 def _nearest_code_indices(values: torch.Tensor, codes: torch.Tensor) -> torch.Tensor:
     """Map scalar tensor elements to nearest index in ``codes`` (1-D, sorted ascending)."""
     flat = values.reshape(-1)

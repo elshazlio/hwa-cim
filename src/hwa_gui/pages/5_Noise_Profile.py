@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Hardware profiles · HWA-CiM Lab",
+    page_title="Hardware profiles · SRAM HWA Lab",
     page_icon="🎚️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -44,12 +44,13 @@ st.caption(
     "Only **Monte Carlo CSV** is the thesis-grade statistical Phase 5 path."
 )
 
-tab_syn, tab_pex, tab_corner, tab_sur, tab_mc = st.tabs(
+tab_syn, tab_pex, tab_corner, tab_sur, tab_cadence, tab_mc = st.tabs(
     [
         "Synthetic",
         "Maestro PEX",
         "PEX corners",
         "Phase 4.5 Surrogate MC",
+        "Cadence-informed stress",
         "Monte Carlo CSV",
     ]
 )
@@ -232,6 +233,47 @@ Outputs are thesis/plot artifacts — **not** the Phase 5 `input_code` noise pro
     if cap_sum.is_file():
         st.subheader("Cap sweep summary")
         st.dataframe(pd.read_csv(cap_sum), use_container_width=True)
+
+with tab_cadence:
+    render_hardware_profile_banner("cadence_surrogate_stress")
+    st.markdown(
+        """
+**Phase 4.5 — Cadence-informed surrogate stress** (AgDR-0007)
+
+Maps normalized `/OA_Charge` spread from a Phase 4.5 summary to **relative output noise**
+in baseline eval and HWA training. Use this mode for the proxy recovery graph — not Phase 5 MC.
+"""
+    )
+    from hwa_gui.wizard.actions import DEFAULT_SURROGATE_SUMMARY
+
+    sum_path = st.text_input(
+        "Surrogate summary CSV",
+        value=DEFAULT_SURROGATE_SUMMARY,
+        key="cad_sum",
+    )
+    full = root() / sum_path
+    if full.is_file():
+        try:
+            from hwa_cim.cadence_stress import load_cadence_stress_profile
+
+            prof = load_cadence_stress_profile(full)
+            c1, c2, c3 = st.columns(3)
+            c1.metric("mean_output (V)", f"{prof.mean_output:.6f}")
+            c2.metric("sigma_output (V)", f"{prof.sigma_output:.6f}")
+            c3.metric("σ_rel (applied stress)", f"{prof.surrogate_sigma_rel * 100:.4f}%")
+            st.dataframe(pd.read_csv(full), use_container_width=True)
+        except Exception as e:
+            st.error(str(e))
+    else:
+        st.warning("Summary missing — run **Phase 4.5 Surrogate MC** tab first.")
+    st.caption(
+        "Train/eval: **Run → HWA train** with profile "
+        "**Phase 4.5 — Cadence-informed surrogate stress**, or the guided wizard with that profile."
+    )
+    plot_png = root() / "results/plots/05_cadence_stress/01_hwa_recovery_under_cadence_stress.png"
+    if plot_png.is_file():
+        st.subheader("Recovery plot")
+        st.image(str(plot_png), use_container_width=True)
 
 with tab_mc:
     render_hardware_profile_banner("monte_carlo_csv")

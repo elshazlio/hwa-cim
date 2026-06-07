@@ -76,13 +76,27 @@ def _header_paren_segment(col: str) -> str:
     return col[start + 1 : end]
 
 
+def _row_hint_from_pair(df: pd.DataFrame, pair: SweepColumnPair) -> Optional[str]:
+    """Corner shorthand from VIVA row 0 under the X column, if non-numeric."""
+    if pair.x_col not in df.columns or len(df) == 0:
+        return None
+    val = df.iloc[0][pair.x_col]
+    if pd.isna(val):
+        return None
+    key = str(val).strip().lower()
+    if key.replace(".", "", 1).isdigit():
+        return None
+    return key
+
+
 def infer_corner_label(header_segment: str, row2_value: Optional[str] = None) -> str:
     """Map VIVA header or row-2 shorthand to corner name."""
-    if row2_value:
+    if row2_value is not None:
         key = str(row2_value).strip().lower()
         if key in _CORNER_LABEL_MAP:
             return _CORNER_LABEL_MAP[key]
-        return key
+        if key and not key.replace(".", "", 1).isdigit():
+            return key
     seg = header_segment.lower()
     if "modelfiles=nom" in seg or ",nom," in seg:
         return "nominal"
@@ -250,28 +264,19 @@ def process_pvt_pex_wide_corners(
     nopex_cols = list(nopex_df.columns)
     pex_cols = list(pex_df.columns)
 
-    row2_nopex = (
-        nopex_df.iloc[0].tolist() if len(nopex_df) > 0 else [None] * len(nopex_cols)
-    )
-    row2_pex = pex_df.iloc[0].tolist() if len(pex_df) > 0 else [None] * len(pex_cols)
-
-    def _corner_table(
-        raw: pd.DataFrame,
-        columns: list[str],
-        row2: list[Any],
-    ) -> dict[str, float]:
+    def _corner_table(raw: pd.DataFrame, columns: list[str]) -> dict[str, float]:
         pairs = find_all_signal_xy_pairs(columns, signal)
         out: dict[str, float] = {}
-        for i, pair in enumerate(pairs):
+        for pair in pairs:
             tx, vy = _coerce_numeric_waveform(raw, pair.x_col, pair.y_col)
             v = sample_at_time_ns(tx, vy, sample_time_ns)
             seg = _header_paren_segment(pair.x_col)
-            label = infer_corner_label(seg, row2[i] if i < len(row2) else None)
+            label = infer_corner_label(seg, _row_hint_from_pair(raw, pair))
             out[label] = v
         return out
 
-    nopex_v = _corner_table(nopex_df, nopex_cols, row2_nopex)
-    pex_v = _corner_table(pex_df, pex_cols, row2_pex)
+    nopex_v = _corner_table(nopex_df, nopex_cols)
+    pex_v = _corner_table(pex_df, pex_cols)
 
     rows: list[dict[str, Any]] = []
     for corner in sorted(set(nopex_v) | set(pex_v)):

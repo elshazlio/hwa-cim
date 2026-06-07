@@ -1,0 +1,427 @@
+
+
+
+                  ##################################################
+                  ##                                              ##
+                  ##         C A L I B R E    S Y S T E M         ##
+                  ##                                              ##
+                  ##             L V S   R E P O R T              ##
+                  ##                                              ##
+                  ##################################################
+
+
+
+REPORT FILE NAME:         6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder.lvs.report
+LAYOUT NAME:              svdb/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder.sp ('6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder')
+SOURCE NAME:              6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder.src.net ('6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder')
+RULE FILE:                _G-DF-LOGIC_MIXED_MODE65N_1P10M2T2F_SP_LOW_K_TOP_METAL8K-XRC-LPE-1.0_P2-Typ.tec_
+RULE FILE TITLE:          UMC Calibre LVS 65nm LOGIC/MIXED MODE Standard Performance Low-K Process
+CREATION TIME:            Sat May 23 18:30:47 2026
+CURRENT DIRECTORY:        /eda/Shazli_simulations
+USER NAME:                vlsi
+CALIBRE VERSION:          v2025.2_23.15    Thu May 1 16:58:34 PDT 2025
+
+
+
+                               OVERALL COMPARISON RESULTS
+
+
+
+                         #       ###################       _   _   
+                        #        #                 #       *   *   
+                   #   #         #     CORRECT     #         |     
+                    # #          #                 #       \___/  
+                     #           ###################               
+
+
+  Warning:  Ambiguity points were found and resolved arbitrarily.
+
+
+**************************************************************************************************************
+                                      CELL  SUMMARY
+**************************************************************************************************************
+
+  Result         Layout                        Source
+  -----------    -----------                   --------------
+  CORRECT        6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder 6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder
+
+
+
+**************************************************************************************************************
+                                      LVS PARAMETERS
+**************************************************************************************************************
+
+
+o LVS Setup:
+
+   // LVS COMPONENT TYPE PROPERTY
+   // LVS COMPONENT SUBTYPE PROPERTY
+   // LVS PIN NAME PROPERTY
+   LVS POWER NAME                         "?VCC?" "?VDD?"
+   LVS GROUND NAME                        "?GND?" "?VSS?"
+   LVS CELL SUPPLY                        NO
+   LVS RECOGNIZE GATES                    NONE
+   // LVS HCELL REPORT
+   LVS IGNORE PORTS                       NO
+   LVS CHECK PORT NAMES                   YES
+   LVS IGNORE TRIVIAL NAMED PORTS         NO
+   LVS BUILTIN DEVICE PIN SWAP            NO
+   LVS ALL CAPACITOR PINS SWAPPABLE       NO
+   LVS DISCARD PINS BY DEVICE             NO
+   LVS SOFT SUBSTRATE PINS                NO
+   LVS INJECT LOGIC                       NO
+   LVS EXPAND UNBALANCED CELLS            YES
+   LVS FLATTEN INSIDE CELL                NO
+   LVS EXPAND SEED PROMOTIONS             YES
+   LVS PRESERVE PARAMETERIZED CELLS       NO
+   LVS GLOBALS ARE PORTS                  YES
+   LVS RELAX INITIAL CPOINTS              NONE
+   LVS REVERSE WL                         NO
+   // LVS NETLIST FILTER DEVICES          NO
+   // LVS PRESERVE BOX PORTS              NO
+   LVS SPICE PREFER PINS                  NO
+   LVS SPICE SLASH IS SPACE               YES
+   LVS SPICE ALLOW FLOATING PINS          YES
+   // LVS SPICE ALLOW INLINE PARAMETERS     
+   LVS SPICE ALLOW UNQUOTED STRINGS       NO
+   LVS SPICE CONDITIONAL LDD              NO
+   LVS SPICE CULL PRIMITIVE SUBCIRCUITS   NO
+   // LVS SPICE EXCLUDE CELL SOURCE
+   // LVS SPICE EXCLUDE CELL LAYOUT
+   // LVS SPICE IGNORE PARAMETER
+   LVS SPICE IMPLIED MOS AREA             NO
+   // LVS SPICE MULTIPLIER NAME
+   LVS SPICE OVERRIDE GLOBALS             NO
+   LVS SPICE REDEFINE PARAM               NO
+   LVS SPICE REPLICATE DEVICES            YES
+   LVS SPICE SCALE X PARAMETERS           NO
+   LVS SPICE STRICT WL                    NO
+   // LVS SPICE OPTION
+   LVS STRICT SUBTYPES                    NO
+   LVS EXACT SUBTYPES                     NO
+   LAYOUT CASE                            NO
+   SOURCE CASE                            NO
+   LVS COMPARE CASE                       NO
+   LVS COMPARE CASE STRICT                NO
+   LVS DOWNCASE DEVICE                    NO
+   LVS REPORT MAXIMUM                     1000
+   LVS PROPERTY RESOLUTION MAXIMUM        32
+   // LVS SIGNATURE MAXIMUM
+   // LVS FILTER UNUSED OPTION
+   LVS REPORT OPTION                      A B C D S
+   LVS REPORT UNITS                       YES
+   LVS SWAPPABLE HCELL PINS               GENERAL
+   // LVS NON USER NAME PORT
+   // LVS NON USER NAME NET
+   // LVS NON USER NAME INSTANCE
+   // LVS IGNORE DEVICE PIN
+   // LVS PREFER NETS FILTER SOURCE
+   // LVS PREFER NETS FILTER LAYOUT
+   LVS PREFER PORT NETS                   NO
+   LVS EXPAND ON ERROR                    NO
+   LVS EXPAND AMBIGUOUSLY HIGH SHORTED HCELLS NO
+   LVS AUGMENT HCELLS                     NONE
+
+   // Reduction
+
+   LVS REDUCE SERIES MOS                  NO
+   LVS REDUCE PARALLEL MOS                YES
+   LVS REDUCE SEMI SERIES MOS             NO
+   LVS REDUCE SPLIT GATES                 YES
+   LVS REDUCE PARALLEL BIPOLAR            YES
+   LVS REDUCE SERIES CAPACITORS           YES
+   LVS REDUCE PARALLEL CAPACITORS         YES
+   LVS REDUCE SERIES RESISTORS            YES
+   LVS REDUCE PARALLEL RESISTORS          YES
+   LVS REDUCE PARALLEL DIODES             YES
+
+   LVS REDUCE  C(MIMCAPS_20F_MM)  PARALLEL NO
+   LVS REDUCE  C(NCAP_11_SP)  PARALLEL NO
+   LVS REDUCE  C(NCAP_18_SP)  PARALLEL NO
+   LVS REDUCE  C(NCAP_25_SP)  PARALLEL NO
+   LVS REDUCE  C(NCAP_33_SP)  PARALLEL NO
+   LVS REDUCTION PRIORITY                 PARALLEL
+   
+   LVS SHORT EQUIVALENT NODES             NO
+
+   // Trace Property
+
+   TRACE PROPERTY  n_25_sprf  lf lf 3
+   TRACE PROPERTY  n_25_sprf  wf wf 3
+   TRACE PROPERTY  n_25_sprf  nf nf 0
+   TRACE PROPERTY  n_25_sprf  con con 0
+   TRACE PROPERTY  p_25_sprf  lf lf 3
+   TRACE PROPERTY  p_25_sprf  wf wf 3
+   TRACE PROPERTY  p_25_sprf  nf nf 0
+   TRACE PROPERTY  p_25_sprf  con con 0
+   TRACE PROPERTY  n_bpw_25_sprf  lf lf 3
+   TRACE PROPERTY  n_bpw_25_sprf  wf wf 3
+   TRACE PROPERTY  n_bpw_25_sprf  nf nf 0
+   TRACE PROPERTY  n_bpw_25_sprf  con con 0
+   TRACE PROPERTY  n_10_sprvtrf  lf lf 3
+   TRACE PROPERTY  n_10_sprvtrf  wf wf 3
+   TRACE PROPERTY  n_10_sprvtrf  nf nf 0
+   TRACE PROPERTY  n_10_sprvtrf  con con 0
+   TRACE PROPERTY  p_10_sprvtrf  lf lf 3
+   TRACE PROPERTY  p_10_sprvtrf  wf wf 3
+   TRACE PROPERTY  p_10_sprvtrf  nf nf 0
+   TRACE PROPERTY  p_10_sprvtrf  con con 0
+   TRACE PROPERTY  n_bpw_10_sprvtrf  lf lf 3
+   TRACE PROPERTY  n_bpw_10_sprvtrf  wf wf 3
+   TRACE PROPERTY  n_bpw_10_sprvtrf  nf nf 0
+   TRACE PROPERTY  n_bpw_10_sprvtrf  con con 0
+   TRACE PROPERTY  r(rsnpo_efuse)  r r 3
+   TRACE PROPERTY  r(rsppo_efuse)  r r 3
+   TRACE PROPERTY  rnnpo_nw_sprf  r r 3
+   TRACE PROPERTY  rnnpo_nw_sprf  l l 3
+   TRACE PROPERTY  rnnpo_nw_sprf  w w 3
+   TRACE PROPERTY  rnnpo_sprf  r r 3
+   TRACE PROPERTY  rnnpo_sprf  l l 3
+   TRACE PROPERTY  rnnpo_sprf  w w 3
+   TRACE PROPERTY  rnppo_nw_sprf  r r 3
+   TRACE PROPERTY  rnppo_nw_sprf  l l 3
+   TRACE PROPERTY  rnppo_nw_sprf  w w 3
+   TRACE PROPERTY  rnppo_sprf  r r 3
+   TRACE PROPERTY  rnppo_sprf  l l 3
+   TRACE PROPERTY  rnppo_sprf  w w 3
+   TRACE PROPERTY  rnhr_nw_sprf  r r 3
+   TRACE PROPERTY  rnhr_nw_sprf  l l 3
+   TRACE PROPERTY  rnhr_nw_sprf  w w 3
+   TRACE PROPERTY  rnhr_sprf  r r 3
+   TRACE PROPERTY  rnhr_sprf  l l 3
+   TRACE PROPERTY  rnhr_sprf  w w 3
+   TRACE PROPERTY  r(fuse)  r r 3
+   TRACE PROPERTY  varmis_11_rf  lf lf 0
+   TRACE PROPERTY  varmis_11_rf  wf wf 3
+   TRACE PROPERTY  varmis_11_rf  nf nf 0
+   TRACE PROPERTY  varmis_11_rf  array array 0
+   TRACE PROPERTY  varmis_25_sprf  lf lf 0
+   TRACE PROPERTY  varmis_25_sprf  wf wf 3
+   TRACE PROPERTY  varmis_25_sprf  nf nf 0
+   TRACE PROPERTY  varmis_25_sprf  array array 0
+   TRACE PROPERTY  r(ral)  r r 3
+   TRACE PROPERTY  d(dion_sp_a)  a a 3
+   TRACE PROPERTY  d(dion_sp_a)  p p 3
+   TRACE PROPERTY  d(diop_sp_a)  a a 3
+   TRACE PROPERTY  d(diop_sp_a)  p p 3
+   TRACE PROPERTY  d(dionw_sp)  a a 3
+   TRACE PROPERTY  d(dionw_sp)  p p 3
+   TRACE PROPERTY  d(diodnw_sp)  a a 3
+   TRACE PROPERTY  d(diodnw_sp)  p p 3
+   TRACE PROPERTY  d(diodp_sp)  a a 3
+   TRACE PROPERTY  d(diodp_sp)  p p 3
+   TRACE PROPERTY  momcaps_sy_mmkf  nf nf 0
+   TRACE PROPERTY  momcaps_sy_mmkf  l l 0
+   TRACE PROPERTY  momcaps_sy_mmkf  nm nm 0
+   TRACE PROPERTY  momcaps_sy_mmkf  bm bm 0
+   TRACE PROPERTY  momcaps_as_mmkf  nf nf 0
+   TRACE PROPERTY  momcaps_as_mmkf  l l 0
+   TRACE PROPERTY  momcaps_as_mmkf  nm nm 0
+   TRACE PROPERTY  momcaps_as_mmkf  bm bm 0
+   TRACE PROPERTY  momcaps_symesh_mmkf  nf nf 0
+   TRACE PROPERTY  momcaps_symesh_mmkf  mh mh 0
+   TRACE PROPERTY  momcaps_symesh_mmkf  nm nm 0
+   TRACE PROPERTY  momcaps_symesh_mmkf  bm bm 0
+   TRACE PROPERTY  momcaps_symesh_mmkf  l l 3
+   TRACE PROPERTY  momcaps_asmesh_mmkf  nf nf 0
+   TRACE PROPERTY  momcaps_asmesh_mmkf  mh mh 0
+   TRACE PROPERTY  momcaps_asmesh_mmkf  nm nm 0
+   TRACE PROPERTY  momcaps_asmesh_mmkf  bm bm 0
+   TRACE PROPERTY  momcaps_asmesh_mmkf  l l 3
+   TRACE PROPERTY  momcaps_array_vp3_rfvcl  bm bm 0
+   TRACE PROPERTY  momcaps_array_vp3_rfvcl  ns ns 0
+   TRACE PROPERTY  momcaps_array_vp3_rfvcl  nf nf 0
+   TRACE PROPERTY  momcaps_array_vp3_rfvcl  array array 0
+   TRACE PROPERTY  momcaps_array_vp3_rfvcl  lf lf 0
+   TRACE PROPERTY  momcaps_array_vp4_rfvcl  bm bm 0
+   TRACE PROPERTY  momcaps_array_vp4_rfvcl  ns ns 0
+   TRACE PROPERTY  momcaps_array_vp4_rfvcl  nf nf 0
+   TRACE PROPERTY  momcaps_array_vp4_rfvcl  array array 0
+   TRACE PROPERTY  momcaps_array_vp4_rfvcl  lf lf 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  bm bm 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  ns ns 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  nf nf 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  array array 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  lf lf 0
+   TRACE PROPERTY  momcaps_array_vp5_rfvcl  sh sh 0
+   TRACE PROPERTY  mimcaps_20f_nwell_rfkf  l l 0
+   TRACE PROPERTY  mimcaps_20f_nwell_rfkf  w w 3
+   TRACE PROPERTY  mimcaps_20f_psub_rfkf  l l 0
+   TRACE PROPERTY  mimcaps_20f_psub_rfkf  w w 3
+   TRACE PROPERTY  mimcaps_20f_m1_rfkf  l l 0
+   TRACE PROPERTY  mimcaps_20f_m1_rfkf  w w 3
+   TRACE PROPERTY  c(mimcaps_20f_mm)  c c 3
+   TRACE PROPERTY  pad_rf  index_layer index_layer 0
+   TRACE PROPERTY  pad_rf  index_thick index_thick 0
+   TRACE PROPERTY  pad_rf  index_pad index_pad 0
+
+
+
+                   CELL COMPARISON RESULTS ( TOP LEVEL )
+
+
+
+                         #       ###################       _   _   
+                        #        #                 #       *   *   
+                   #   #         #     CORRECT     #         |     
+                    # #          #                 #       \___/  
+                     #           ###################               
+
+
+  Warning:  Ambiguity points were found and resolved arbitrarily.
+
+LAYOUT CELL NAME:         6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder
+SOURCE CELL NAME:         6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder
+
+--------------------------------------------------------------------------------------------------------------
+
+INITIAL NUMBERS OF OBJECTS
+--------------------------
+
+                Layout    Source         Component Type
+                ------    ------         --------------
+ Ports:             64        64
+
+ Nets:             345       261    *
+
+ Instances:        177       161    *    MN (4 pins)
+                   177       177         MP (4 pins)
+                    44        44         MOMCAPS_SY_MMKF (3 pins)
+                ------    ------
+ Total Inst:       398       382
+
+
+NUMBERS OF OBJECTS AFTER TRANSFORMATION
+---------------------------------------
+
+                Layout    Source         Component Type
+                ------    ------         --------------
+ Ports:             64        64
+
+ Nets:             261       261
+
+ Instances:        161       161         MN (4 pins)
+                   177       177         MP (4 pins)
+                    44        44         MOMCAPS_SY_MMKF (3 pins)
+                ------    ------
+ Total Inst:       382       382
+
+
+       * = Number of objects in layout different from number in source.
+
+
+
+**************************************************************************************************************
+                               INFORMATION AND WARNINGS
+**************************************************************************************************************
+
+
+                  Matched    Matched    Unmatched    Unmatched    Component
+                   Layout     Source       Layout       Source    Type
+                  -------    -------    ---------    ---------    ---------
+   Ports:              64         64            0            0
+
+   Nets:              261        261            0            0
+
+   Instances:         161        161            0            0    MN(N_11_SPLVT)
+                       12         12            0            0    MP(P_11_SPHVT)
+                      165        165            0            0    MP(P_11_SPLVT)
+                       44         44            0            0    MOMCAPS_SY_MMKF
+                  -------    -------    ---------    ---------
+   Total Inst:        382        382            0            0
+
+
+o Statistics:
+
+   84 isolated layout nets were deleted.
+
+   32 layout mos transistors were reduced to 16.
+     16 mos transistors were deleted by parallel reduction.
+
+   17 nets and 12 instances were matched arbitrarily.
+
+
+o Initial Correspondence Points:
+
+   Ports:        VDD GND A0 A1 Q1_BARR1 Q1_BARR3 Q1R1 Q1R3 BL1 BLB1 EN BL2 Q2_BARR3 Q2_BARR1 SAE
+                 BLB2 Q2R3 Q2R1 WE Q3_BARR3 Q3_BARR1 Q3R1 Q3R3 Q4_BARR1 Q4R1 Q4_BARR3 Q4R3
+                 Q1_BARR4 Q1R2 Q1_BARR2 Q1R4 Q2_BARR4 Q2_BARR2 Q2R2 Q2R4 Q3_BARR4 Q3_BARR2 Q3R2
+                 Q3R4 BL3 BLB3 Q4_BARR2 Q4_BARR4 BL4 Q4R2 Q4R4 BLB4 DATA_IN_1 DATA_IN_2
+                 DATA_IN_3 DATA_IN_4 WL3 WL1 WL2 WL4 OA_CHARGE IA_ANALOGR3 IA_ANALOGR1
+                 IA_ANALOGR4 IA_ANALOGR2 READ_OUT_1 READ_OUT_2 READ_OUT_3 READ_OUT_4
+
+
+o Voltage Names Matched by Wildcard:
+
+   Power Names from Layout:
+
+                 VDD
+
+   Ground Names from Layout:
+
+                 GND
+
+   Power Names from Source:
+
+                 VDD
+
+   Ground Names from Source:
+
+                 GND
+
+
+o Ambiguity Resolution Points:
+
+      (Each one of the following objects belongs to a group of indistinguishable objects.
+       The listed objects were matched arbitrarily by the Ambiguity Resolution feature of LVS.
+       Arbitrary matching may be prevented by assigning names to these objects or to adjacent nets).
+
+       Layout                                                    Source
+       ------                                                    ------
+
+                                     Nets
+                                     ----
+
+       88                                                        XI21/net1
+       84                                                        XI20/net1
+       80                                                        XI19/net1
+       168                                                       XI29/net28
+       201                                                       XI27/net28
+       102                                                       XI30/net28
+       143                                                       XI30/net13
+       209                                                       XI28/net13
+       110                                                       XI29/net13
+       184                                                       XI29/net24
+       217                                                       XI27/net24
+       150                                                       XI28/net24
+       118                                                       XI30/net24
+       144                                                       XI30/net9
+       210                                                       XI28/net9
+       162                                                       XI27/net23
+       111                                                       XI29/net9
+
+
+                                   Instances
+                                   ---------
+
+       X259(16.836,-14.005)  MOMCAPS_SY_MMKF                     XI17/XC1  MOMCAPS_SY_MMKF
+       X265(21.726,-14.005)  MOMCAPS_SY_MMKF                     XI17/XC5  MOMCAPS_SY_MMKF
+       X271(26.616,-14.005)  MOMCAPS_SY_MMKF                     XI17/XC10  MOMCAPS_SY_MMKF
+       X281(38.488,-14.005)  MOMCAPS_SY_MMKF                     XI43/XC1  MOMCAPS_SY_MMKF
+       X287(43.378,-14.005)  MOMCAPS_SY_MMKF                     XI43/XC5  MOMCAPS_SY_MMKF
+       X293(48.268,-14.005)  MOMCAPS_SY_MMKF                     XI43/XC10  MOMCAPS_SY_MMKF
+       X258(16.836,-40.710)  MOMCAPS_SY_MMKF                     XI48/XC1  MOMCAPS_SY_MMKF
+       X264(21.726,-40.710)  MOMCAPS_SY_MMKF                     XI48/XC5  MOMCAPS_SY_MMKF
+       X270(26.616,-40.710)  MOMCAPS_SY_MMKF                     XI48/XC10  MOMCAPS_SY_MMKF
+       X280(38.488,-40.710)  MOMCAPS_SY_MMKF                     XI49/XC1  MOMCAPS_SY_MMKF
+       X286(43.378,-40.710)  MOMCAPS_SY_MMKF                     XI49/XC5  MOMCAPS_SY_MMKF
+       X292(48.268,-40.710)  MOMCAPS_SY_MMKF                     XI49/XC10  MOMCAPS_SY_MMKF
+
+
+
+**************************************************************************************************************
+                                         SUMMARY
+**************************************************************************************************************
+
+Total CPU Time:      0 sec
+Total Elapsed Time:  0 sec

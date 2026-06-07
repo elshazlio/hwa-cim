@@ -1,6 +1,6 @@
-Based on your project status and the **Analog Foundation Models** methodology outlined in your thesis reports, here is the **Bird's Eye View** of where you stand and what remains.
+Based on our project status and the **Analog Foundation Models** methodology outlined in our thesis reports, here is the **Bird's Eye View** of where we stand and what remains.
 
-You are transitioning from **schematic-complete system integration** in Virtuoso toward **layout, parasitic extraction, Monte Carlo hardening**, and **AI co-design at scale** (training on real or PEX-shaped statistics). Three parallel tracks still matter: **physical implementation**, **extracted-netlist validation**, and **hardware-aware software**.
+We are transitioning from **schematic-complete system integration** in Virtuoso toward **layout, parasitic extraction, Monte Carlo hardening**, and **AI co-design at scale** (training on real or PEX-shaped statistics). Three parallel tracks still matter: **physical implementation**, **extracted-netlist validation**, and **hardware-aware software**.
 
 ---
 
@@ -38,7 +38,7 @@ Once post-layout behavior is characterized, the emphasis shifts from “fix the 
 
 The literature gap on **power in multi-array scaling** still stands.
 
-- **Experiment:** Once you have a **validated macro** (today’s scope is **4×4** schematic-verified; larger tiles are future work), simulate **two** macros and compare **data movement energy** vs **compute energy** on the shared column / interconnect story.
+- **Experiment:** Once we have a **validated macro** (today’s scope is **4×4** schematic-verified; larger tiles are future work), simulate **two** macros and compare **data movement energy** vs **compute energy** on the shared column / interconnect story.
 - **Measurement / conclusion:** Pie-chart style breakdown: **compute vs inter-array communication** to support the scalability claim in **65 nm**.
 
 ---
@@ -46,7 +46,7 @@ The literature gap on **power in multi-array scaling** still stands.
 ## Summary checklist (“the end”)
 
 1. [done] **Schematic:** 4×4 **SRAM–MAC** with **C-2C** ladder logic, **decoder**, **DAC**, and **SAR ADC** integrated in Virtuoso (UMC 65 nm full custom; **SAR comparator** = ideal library cell for now → **custom comparator** planned).
-2. [ ] **Layout:** Clean, DRC/LVS-clean **layout** of the macro in UMC 65 nm.
+2. [almost done] **Layout:** Clean, DRC/LVS-clean **layout** of the macro in UMC 65 nm.
 3. [ ] **Tuning:** Post-PEX simulation with acceptable linearity (serial cap / geometry tuning as needed).
 4. [ ] **Noise profile:** Error vs output code from **Monte Carlo on extracted layout**; export CSV for Phase 5 in `hwa-cim`.
 5. [ ] **AI result:** Chart — accuracy **without** HWA-style training vs **with** training (synthetic then real noise).

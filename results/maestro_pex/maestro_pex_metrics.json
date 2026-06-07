@@ -1,5 +1,5 @@
 {
-  "manifest": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/config/maestro_pex.yaml",
+  "manifest": "/Users/elshazlio/Documents/My Projects/sram-hwa-hybrid-ai/config/maestro_pex.yaml",
   "signal": "/OA_Charge",
   "sample_time_ns": 200.25,
   "n_runs": 1,
@@ -19,8 +19,8 @@
       "marker": "current_inference_vector",
       "signal": "/OA_Charge",
       "sample_time_ns": 200.25,
-      "nopex_csv": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/nopex1.csv",
-      "pex_csv": "/Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/pex1.csv",
+      "nopex_csv": "/Users/elshazlio/Documents/My Projects/sram-hwa-hybrid-ai/stuff_from_cadence/nopex1.csv",
+      "pex_csv": "/Users/elshazlio/Documents/My Projects/sram-hwa-hybrid-ai/stuff_from_cadence/pex1.csv",
       "nopex_v": 0.8274353274673941,
       "pex_v": 0.7554211608049415,
       "delta_v": -0.07201416666245264,

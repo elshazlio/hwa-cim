@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1366" height="768" viewBox="0 0 1366 768">
+  <defs>
+    <style>
+      .bg { fill: #f5f8ff; }
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 42px; font-weight: 700; fill: #24476f; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 18px; fill: #3f5874; }
+      .card { fill: #ffffff; stroke-width: 2.2; rx: 18; }
+      .teacher { stroke: #1b7f68; fill: #e2f4ee; }
+      .stress { stroke: #514b8a; fill: #ecebfb; }
+      .loop { stroke: #9a6518; fill: #fff3df; }
+      .student { stroke: #5a8f29; fill: #edf7e8; }
+      .cardTitle { font-family: Arial, Helvetica, sans-serif; font-size: 25px; font-weight: 700; fill: #173a5e; }
+      .cardTitleSm { font-family: Arial, Helvetica, sans-serif; font-size: 19px; font-weight: 700; fill: #173a5e; }
+      .smallTitle { font-family: Arial, Helvetica, sans-serif; font-size: 19px; font-weight: 700; fill: #173a5e; }
+      .body { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #263b50; }
+      .bodySm { font-family: Arial, Helvetica, sans-serif; font-size: 14px; fill: #263b50; }
+      .bodyBold { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 700; fill: #263b50; }
+      .bodyBoldSm { font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 700; fill: #263b50; }
+      .note { font-family: Arial, Helvetica, sans-serif; font-size: 15px; fill: #5c6f83; }
+      .stepBox { fill: #ffffff; stroke: #c4873a; stroke-width: 1.7; rx: 12; }
+      .pill { fill: #24476f; }
+      .pillText { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 700; fill: #ffffff; }
+      .arrow { stroke: #52677d; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .thinArrow { stroke: #52677d; stroke-width: 2.3; fill: none; marker-end: url(#arrowhead); }
+      .footer { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #60758d; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#52677d"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1366" height="768"/>
+  <text class="title" x="683" y="62" text-anchor="middle">Hardware-Aware Training Loop</text>
+  <text class="subtitle" x="683" y="94" text-anchor="middle">Teacher supplies clean knowledge. Surrogate MC-derived RC model supplies hardware reality. The student learns to survive both.</text>
+
+  <!-- Left top: teacher -->
+  <rect class="card teacher" x="58" y="132" width="298" height="166" rx="18"/>
+  <text class="cardTitle" x="207" y="169" text-anchor="middle">Teacher Model</text>
+  <line x1="92" y1="185" x2="322" y2="185" stroke="#1b7f68" stroke-width="2"/>
+  <text class="bodyBold" x="88" y="218">What it is:</text>
+  <text class="body" x="88" y="242">a clean, high-accuracy model</text>
+  <text class="bodyBold" x="88" y="272">What it teaches:</text>
+  <text class="body" x="88" y="296">soft labels/logits for MNIST</text>
+
+  <!-- Left bottom: surrogate MC RC model -->
+  <rect class="card stress" x="58" y="362" width="348" height="248" rx="18"/>
+  <text class="cardTitleSm" x="232" y="396" text-anchor="middle">Surrogate Monte Carlo -</text>
+  <text class="cardTitleSm" x="232" y="420" text-anchor="middle">Derived RC Model</text>
+  <line x1="94" y1="434" x2="370" y2="434" stroke="#514b8a" stroke-width="2"/>
+  <text class="bodyBoldSm" x="88" y="462">Source:</text>
+  <text class="bodySm" x="148" y="462">Phase 4.5 /OA_Charge MC summaries</text>
+  <text class="bodyBoldSm" x="88" y="488">Inputs:</text>
+  <text class="bodySm" x="148" y="488">mean_output, sigma_output, spread</text>
+  <text class="bodyBoldSm" x="88" y="514">RC mapping:</text>
+  <text class="bodySm" x="168" y="514">sigma_rel = sigma_output / |mean_output|</text>
+  <text class="bodyBoldSm" x="88" y="540">Applied as:</text>
+  <text class="bodySm" x="168" y="540">relative output noise (~1.29%)</text>
+  <text class="bodySm" x="88" y="572">Not final Phase 5 per-code Monte Carlo</text>
+
+  <!-- Center: training loop -->
+  <rect class="card loop" x="450" y="118" width="500" height="552" rx="20"/>
+  <text class="cardTitle" x="700" y="157" text-anchor="middle">PyTorch Student Training</text>
+  <line x1="492" y1="177" x2="908" y2="177" stroke="#9a6518" stroke-width="2"/>
+
+  <rect class="stepBox" x="490" y="205" width="420" height="96" rx="12"/>
+  <circle class="pill" cx="520" cy="252" r="18"/>
+  <text class="pillText" x="520" y="258" text-anchor="middle">1</text>
+  <text class="smallTitle" x="552" y="238">Student forward pass</text>
+  <text class="bodySm" x="552" y="262">INT4 student runs MAC through the surrogate</text>
+  <text class="bodySm" x="552" y="282">MC-derived RC model before ADC quantization.</text>
+
+  <rect class="stepBox" x="490" y="325" width="420" height="86" rx="12"/>
+  <circle class="pill" cx="520" cy="368" r="18"/>
+  <text class="pillText" x="520" y="374" text-anchor="middle">2</text>
+  <text class="smallTitle" x="552" y="358">Inject RC-modeled hardware stress</text>
+  <text class="bodySm" x="552" y="382">Relative output noise from sigma_rel perturbs the forward result.</text>
+
+  <rect class="stepBox" x="490" y="443" width="420" height="86" rx="12"/>
+  <circle class="pill" cx="520" cy="486" r="18"/>
+  <text class="pillText" x="520" y="492" text-anchor="middle">3</text>
+  <text class="smallTitle" x="552" y="476">Compare against teacher + labels</text>
+  <text class="bodySm" x="552" y="500">Student learns the answer and the teacher's confidence pattern.</text>
+
+  <rect class="stepBox" x="490" y="561" width="420" height="78" rx="12"/>
+  <circle class="pill" cx="520" cy="600" r="18"/>
+  <text class="pillText" x="520" y="606" text-anchor="middle">4</text>
+  <text class="smallTitle" x="552" y="591">Update student weights</text>
+  <text class="bodySm" x="552" y="615">Weights adapt to stay accurate under RC-modeled stress.</text>
+
+  <!-- Right: student outcome -->
+  <rect class="card student" x="1010" y="151" width="300" height="430" rx="18"/>
+  <text class="cardTitle" x="1160" y="190" text-anchor="middle">Student Model</text>
+  <line x1="1048" y1="210" x2="1272" y2="210" stroke="#5a8f29" stroke-width="2"/>
+
+  <rect x="1054" y="240" width="212" height="66" rx="12" fill="#ffffff" stroke="#8bb76d" stroke-width="1.6"/>
+  <text class="bodyBold" x="1160" y="268" text-anchor="middle">Who is taught?</text>
+  <text class="body" x="1160" y="292" text-anchor="middle">the small deployable model</text>
+
+  <rect x="1054" y="331" width="212" height="76" rx="12" fill="#ffffff" stroke="#8bb76d" stroke-width="1.6"/>
+  <text class="bodyBold" x="1160" y="359" text-anchor="middle">What does it learn?</text>
+  <text class="body" x="1160" y="383" text-anchor="middle">correct labels plus robustness</text>
+
+  <rect x="1054" y="432" width="212" height="76" rx="12" fill="#ffffff" stroke="#8bb76d" stroke-width="1.6"/>
+  <text class="bodyBold" x="1160" y="460" text-anchor="middle">Why it matters?</text>
+  <text class="body" x="1160" y="484" text-anchor="middle">accuracy survives analog errors</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M356 214 C398 214, 416 234, 450 236"/>
+  <text class="note" x="374" y="203">soft targets</text>
+  <path class="arrow" d="M406 486 C448 486, 462 268, 490 252"/>
+  <text class="note" x="402" y="448">RC model</text>
+  <path class="arrow" d="M910 590 C952 590, 974 482, 1010 466"/>
+  <text class="note" x="932" y="548">trained weights</text>
+
+  <!-- Bottom explanation strip -->
+  <rect x="154" y="704" width="1058" height="38" rx="19" fill="#eaf0f7" stroke="#c6d3e3" stroke-width="1"/>
+  <text class="footer" x="683" y="728" text-anchor="middle">Boundary: Surrogate Monte Carlo-derived RC model (Phase 4.5), not final Phase 5 per-code Monte Carlo.</text>
+</svg>

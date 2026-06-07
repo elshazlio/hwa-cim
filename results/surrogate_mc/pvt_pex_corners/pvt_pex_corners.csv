@@ -1,4 +1,5 @@
 corner,signal,sample_time_ns,nopex_v,pex_v,delta_v,relative_gain,profile_kind,phase_label,profile_warning
-0,/OA_Charge,200.25,0.8263959330728287,,,,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
-ff,/OA_Charge,200.25,,0.7518724522666914,,,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
-nominal,/OA_Charge,200.25,,0.7895918196271932,,,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
+ff,/OA_Charge,200.25,0.9012620811735473,0.7895918196271932,-0.11167026154635418,0.8760956841755213,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
+fnsp,/OA_Charge,200.25,0.8263959330728287,0.7518724522666914,-0.07452348080613724,0.9098210944371025,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
+nominal,/OA_Charge,200.25,0.8274353274673941,0.7554211608049415,-0.07201416666245264,0.9129670147359155,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma
+ss,/OA_Charge,200.25,0.7203686121827906,0.6522078145300056,-0.06816079765278493,0.9053806669251583,pvt_pex_corner_deterministic,Phase 4.5,Deterministic PVT/post-layout corner comparison; not Monte Carlo sigma

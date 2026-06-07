@@ -15,8 +15,8 @@ maestro_pex_runs:
 - marker: current_inference_vector
   signal: /OA_Charge
   sample_time_ns: 200.25
-  nopex_csv: /Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/nopex1.csv
-  pex_csv: /Users/elshazlio/Documents/My Projects/Thesis HW Codesign/stuff_from_cadence/pex1.csv
+  nopex_csv: stuff_from_cadence/nopex1.csv
+  pex_csv: stuff_from_cadence/pex1.csv
   nopex_v: 0.8274353274673941
   pex_v: 0.7554211608049415
   delta_v: -0.07201416666245264

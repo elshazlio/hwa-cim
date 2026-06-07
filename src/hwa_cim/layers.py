@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from hwa_cim.c2c import compute_g_eff, compute_offset
 from hwa_cim.noise import (
     NoiseProfileCSV,
+    additive_relative_output_noise,
     additive_weight_noise,
     additive_weight_noise_sigma,
     noisy_forward_from_profile,
@@ -47,6 +48,7 @@ class NoisyQuantLinear(nn.Module):
         noise_mode: str = "synthetic",
         sigma_global: float | None = None,
         noise_profile: NoiseProfileCSV | None = None,
+        surrogate_sigma_rel: float | None = None,
         hardware_aware: bool = False,
         g_eff_sparse: float | None = None,
         g_eff_dense: float | None = None,
@@ -64,6 +66,7 @@ class NoisyQuantLinear(nn.Module):
         self.noise_mode = noise_mode
         self.sigma_global = sigma_global
         self.noise_profile = noise_profile
+        self.surrogate_sigma_rel = surrogate_sigma_rel
         self.hardware_aware = hardware_aware
         self._g_eff_sparse = g_eff_sparse
         self._g_eff_dense = g_eff_dense
@@ -77,7 +80,15 @@ class NoisyQuantLinear(nn.Module):
         b = self.linear.bias
         w = clip_weights_by_std(w, self.alpha_clip)
         w_q = fake_quantize_int4_ste(w)
-        if self.training and (
+        cadence_stress = (
+            self.training
+            and self.noise_mode == "cadence_stress"
+            and self.surrogate_sigma_rel is not None
+            and self.surrogate_sigma_rel > 0
+        )
+        if cadence_stress:
+            w_noisy = w_q
+        elif self.training and (
             self.gamma > 0
             or (self.sigma_global is not None and self.sigma_global > 0)
             or (self.noise_mode == "csv" and self.noise_profile is not None)
@@ -109,6 +120,8 @@ class NoisyQuantLinear(nn.Module):
                 population_dense_min=self._population_dense_min,
             ).to(dtype=y.dtype, device=y.device)
             y = y * g_eff.unsqueeze(0) + offset.unsqueeze(0)
+        if cadence_stress:
+            y = additive_relative_output_noise(y, float(self.surrogate_sigma_rel))
         if self.use_adc:
             y = adc_quantize_ste(y, self.adc_bits)
         return y

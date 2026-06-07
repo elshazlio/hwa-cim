@@ -8,7 +8,7 @@ from pathlib import Path
 import streamlit as st
 
 st.set_page_config(
-    page_title="Run · HWA-CiM Lab",
+    page_title="Run · SRAM HWA Lab",
     page_icon="▶️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -18,15 +18,16 @@ from hwa_cim.maestro_pex import DEFAULT_PEX_CALIBRATION
 
 from hwa_gui.components import (
     apply_page_style,
-    confirm_overwrite,
     pipeline_quick_reference_md,
     render_hardware_profile_banner,
     render_pipeline_sidebar,
     root,
 )
-from hwa_gui.job_runner import get_job, start_job
+from hwa_gui.job_runner import get_job
 from hwa_gui.log_panel import JOB_ID, render_live_log
+from hwa_gui.wizard.runner import is_run_armed, maybe_start_job, set_run_armed
 from hwa_gui.paths import project_root
+from hwa_gui.wizard.actions import DEFAULT_SURROGATE_SUMMARY, resolve_hardware_profile
 
 os.chdir(project_root())
 
@@ -37,17 +38,7 @@ LOG_PATH = root() / "results" / ".dashboard_last.log"
 
 
 def _maybe_start(fn_label: str, out_dir: Path, thunk) -> None:
-    j = get_job(JOB_ID)
-    if j and j.running:
-        st.warning("A job is already running. Wait for it to finish.")
-        return
-    if not confirm_overwrite(out_dir):
-        st.info("Enable the overwrite confirmation to proceed.")
-        return
-    st.session_state["log_path"] = LOG_PATH
-    start_job(JOB_ID, LOG_PATH, thunk)
-    st.success(f"Started: {fn_label}")
-    st.rerun()
+    maybe_start_job(fn_label, out_dir, thunk)
 
 
 def _job_banner() -> None:
@@ -126,8 +117,10 @@ with tab1:
     c6, c7 = st.columns(2)
     seed = c6.number_input("Seed", 0, 2**31 - 1, 42, key="b_seed")
     device = c7.selectbox("Device", ["cpu", "cuda"], index=0, key="b_dev")
+    od = root() / out_dir
     if st.button("Run baseline", type="primary", key="b_run"):
-        od = root() / out_dir
+        set_run_armed("baseline", od)
+    if is_run_armed("baseline", od):
 
         def _go() -> None:
             from hwa_cim.train_baseline import run_baseline
@@ -166,7 +159,10 @@ with tab2:
         help="Set a path to save noisy eval stats for the thesis three-bar chart.",
     )
     data_dir = st.text_input("Data dir", value="data", key="n_data")
+    noisy_out = (root() / ck).parent
     if st.button("Run noisy eval", type="primary", key="n_run"):
+        set_run_armed("noisy eval", noisy_out)
+    if is_run_armed("noisy eval", noisy_out):
         outp = Path(out_json) if out_json.strip() else None
 
         def _go() -> None:
@@ -181,7 +177,7 @@ with tab2:
                 out=(root() / outp) if outp else None,
             )
 
-        _maybe_start("noisy eval", (root() / ck).parent, _go)
+        _maybe_start("noisy eval", noisy_out, _go)
 
 with tab3:
     st.subheader("Phase 2 — Gamma sweep")
@@ -198,8 +194,10 @@ with tab3:
     c1, c2 = st.columns(2)
     data_dir = c1.text_input("Data dir", value="data", key="g_data")
     device = c2.selectbox("Device", ["cpu", "cuda"], key="g_dev")
+    sweep_od = root() / out_dir
     if st.button("Run gamma sweep", type="primary", key="g_run"):
-        od = root() / out_dir
+        set_run_armed("gamma sweep", sweep_od)
+    if is_run_armed("gamma sweep", sweep_od):
 
         def _go() -> None:
             from hwa_cim.evaluate import run_sweep_gamma
@@ -208,10 +206,10 @@ with tab3:
                 checkpoint=root() / ck,
                 data_dir=root() / data_dir,
                 device=device,
-                out_dir=od,
+                out_dir=sweep_od,
             )
 
-        _maybe_start("gamma sweep", od, _go)
+        _maybe_start("gamma sweep", sweep_od, _go)
 
 with tab4:
     st.subheader("Phase 3 — HWA train")
@@ -228,6 +226,7 @@ with tab4:
         "Maestro PEX Calibration",
         "PEX Corner Proxy",
         "Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)",
+        "Phase 4.5 — Cadence-informed surrogate stress",
         "True Monte Carlo CSV",
     ]
     profile_to_mode = {
@@ -237,6 +236,7 @@ with tab4:
         "Phase 4.5 — Surrogate Monte Carlo (user-defined Gaussian parametric variation)": (
             "surrogate_mc"
         ),
+        "Phase 4.5 — Cadence-informed surrogate stress": "cadence_surrogate_stress",
         "True Monte Carlo CSV": "monte_carlo_csv",
     }
     hw_profile_label = st.selectbox(
@@ -275,13 +275,21 @@ with tab4:
         key="h_np",
         help="MC CSV for True Monte Carlo; corner_proxy_noise_profile.csv for PEX Corner Proxy.",
     )
+    surrogate_summary = st.text_input(
+        "Surrogate summary CSV (Cadence stress)",
+        value=DEFAULT_SURROGATE_SUMMARY,
+        key="h_sur_sum",
+        help="Phase 4.5 surrogate_mc_summary.csv for Cadence-informed stress mode.",
+    )
     if hw_mode == "maestro_pex":
         st.caption(
             f"Uses synthetic noise + PEX calibration. Generate `{DEFAULT_PEX_CALIBRATION.name}` "
             "via **Hardware profiles → Maestro PEX** or `hwa-maestro-pex --write-calibration`."
         )
+    hwa_od = root() / out_dir
     if st.button("Run HWA train", type="primary", key="h_run"):
-        od = root() / out_dir
+        set_run_armed("HWA train", hwa_od)
+    if is_run_armed("HWA train", hwa_od):
         np_path = Path(noise_profile) if noise_profile.strip() else None
         r = root()
 
@@ -289,6 +297,11 @@ with tab4:
             st.warning(
                 "Phase 4.5 surrogate mode records provenance only. Training uses synthetic noise "
                 "(not Phase 5 CSV). Generate summaries on **Hardware profiles → Phase 4.5 Surrogate MC**."
+            )
+        if hw_mode == "cadence_surrogate_stress":
+            st.info(
+                "Cadence-informed stress applies the same normalized Phase 4.5 output noise to "
+                "baseline eval (Phase 2 tab) and HWA training. Not foundry Monte Carlo."
             )
         if hw_mode == "monte_carlo_csv" and not np_path:
             st.error("True Monte Carlo CSV mode requires a noise profile CSV path.")
@@ -303,30 +316,26 @@ with tab4:
                 )
                 st.stop()
 
-        if hw_mode == "synthetic":
-            noise_mode = "synthetic"
-            cal_path = r / cal_yaml if cal_yaml.strip() else None
-        elif hw_mode == "maestro_pex":
-            noise_mode = "synthetic"
-            cal_path = r / DEFAULT_PEX_CALIBRATION
-            if not cal_path.is_file() and cal_yaml.strip():
-                cal_path = r / cal_yaml
-        elif hw_mode == "pex_corner_proxy":
-            noise_mode = "csv"
-            cal_path = r / cal_yaml if cal_yaml.strip() else None
-        elif hw_mode == "surrogate_mc":
-            noise_mode = "synthetic"
-            cal_path = r / cal_yaml if cal_yaml.strip() else None
-        else:
-            noise_mode = "csv"
-            cal_path = r / cal_yaml if cal_yaml.strip() else None
+        sur_path = Path(surrogate_summary) if surrogate_summary.strip() else None
+        noise_mode, cal_path, np_resolved, sur_resolved, err = resolve_hardware_profile(
+            hw_mode,
+            repo=r,
+            cal_yaml=cal_yaml,
+            noise_profile=(r / np_path) if np_path else None,
+            surrogate_summary=(r / sur_path) if sur_path else None,
+        )
+        if err:
+            st.error(err)
+            st.stop()
+        np_path = np_resolved
+        sur_path = sur_resolved
 
         def _go() -> None:
             from hwa_cim.train_hwa import run_hwa_train
 
             run_hwa_train(
                 data_dir=r / data_dir,
-                out_dir=od,
+                out_dir=hwa_od,
                 epochs=int(epochs),
                 batch_size=int(batch),
                 lr=float(lr),
@@ -335,13 +344,14 @@ with tab4:
                 seed=int(seed),
                 device=device,
                 noise_mode=noise_mode,
-                noise_profile=(r / np_path) if np_path else None,
+                noise_profile=np_path,
+                surrogate_summary=sur_path,
                 calibration_yaml=cal_path,
                 eval_noisy_seeds=int(eval_seeds),
                 hardware_profile_mode=hw_mode,
             )
 
-        _maybe_start("HWA train", od, _go)
+        _maybe_start("HWA train", hwa_od, _go)
 
 with tab5:
     st.subheader("Phase 3 — HWA sweep (gamma × alpha grid)")
@@ -363,15 +373,17 @@ with tab5:
     c6, c7 = st.columns(2)
     seed = c6.number_input("Seed", 0, 2**31 - 1, 42, key="hs_seed")
     device = c7.selectbox("Device", ["cpu", "cuda"], key="hs_dev")
+    hs_od = root() / out_dir
     if st.button("Run HWA sweep", type="primary", key="hs_run"):
-        od = root() / out_dir
+        set_run_armed("HWA sweep", hs_od)
+    if is_run_armed("HWA sweep", hs_od):
 
         def _go() -> None:
             from hwa_cim.train_hwa import run_hwa_sweep
 
             run_hwa_sweep(
                 data_dir=root() / data_dir,
-                out_dir=od,
+                out_dir=hs_od,
                 epochs=int(epochs),
                 batch_size=int(batch),
                 lr=float(lr),
@@ -379,7 +391,7 @@ with tab5:
                 device=device,
             )
 
-        _maybe_start("HWA sweep", od, _go)
+        _maybe_start("HWA sweep", hs_od, _go)
 
 with tab6:
     st.subheader("Phase 4 — Distillation")
@@ -409,8 +421,10 @@ with tab6:
     seed = c11.number_input("Seed", 0, 2**31 - 1, 42, key="d_seed")
     tck = st.text_input("Teacher checkpoint (optional)", value="", key="d_tck")
     device = st.selectbox("Device", ["cpu", "cuda"], key="d_dev")
+    distill_od = root() / out_dir
     if st.button("Run distill", type="primary", key="d_run"):
-        od = root() / out_dir
+        set_run_armed("distill", distill_od)
+    if is_run_armed("distill", distill_od):
         tcp = Path(tck) if tck.strip() else None
 
         def _go() -> None:
@@ -418,7 +432,7 @@ with tab6:
 
             run_distill(
                 data_dir=root() / data_dir,
-                out_dir=od,
+                out_dir=distill_od,
                 teacher_epochs=int(te),
                 student_epochs=int(se),
                 batch_size=int(batch),
@@ -432,7 +446,7 @@ with tab6:
                 device=device,
             )
 
-        _maybe_start("distill", od, _go)
+        _maybe_start("distill", distill_od, _go)
 
 with tab7:
     st.subheader("Thesis — three-bar chart (PNG)")
@@ -448,8 +462,10 @@ with tab7:
     hw_ck = st.text_input("HWA checkpoint", value="results/run_hwa/best.pt", key="p_hw")
     noisy = st.text_input("Noisy eval JSON (optional)", value="results/run_baseline/noisy_eval.json", key="p_ne")
     out_png = st.text_input("Output PNG", value="results/figures/thesis_bars.png", key="p_out")
+    chart_od = root() / Path(out_png).parent
     if st.button("Generate thesis chart", type="primary", key="p_run"):
-        od = root() / Path(out_png).parent
+        set_run_armed("thesis chart", chart_od)
+    if is_run_armed("thesis chart", chart_od):
         ne_path = root() / noisy if noisy.strip() else None
 
         def _go() -> None:
@@ -462,7 +478,7 @@ with tab7:
                 out=root() / out_png,
             )
 
-        _maybe_start("thesis chart", od, _go)
+        _maybe_start("thesis chart", chart_od, _go)
 
 with tab8:
     st.subheader("Parasitic sweep figure (PNG)")
@@ -476,15 +492,17 @@ with tab8:
         )
     out_png = st.text_input("Output PNG", value="results/figures/parasitic_sweep.png", key="par_out")
     pdk = st.number_input("PDK marker ratio", 0.0, 0.5, 0.30, format="%.2f", key="par_pdk")
+    par_od = root() / Path(out_png).parent
     if st.button("Generate parasitic plot", type="primary", key="par_run"):
-        od = root() / Path(out_png).parent
+        set_run_armed("parasitic plot", par_od)
+    if is_run_armed("parasitic plot", par_od):
 
         def _go() -> None:
             from hwa_cim.plots import run_parasitic_plot
 
             run_parasitic_plot(out=root() / out_png, pdk_marker=float(pdk))
 
-        _maybe_start("parasitic plot", od, _go)
+        _maybe_start("parasitic plot", par_od, _go)
 
 st.divider()
 st.subheader("Run log")

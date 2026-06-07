@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hwa-cim"
 version = "0.1.0"
-description = "Hardware-aware training pipeline for C-2C SRAM CiM (MNIST micro-MLP); optional Streamlit lab via hwa-dashboard"
+description = "SRAM-based hardware-aware training for hybrid (analog + digital) AI acceleration (C-2C CiM, MNIST micro-MLP); Streamlit lab via hwa-dashboard"
+keywords = ["SRAM", "compute-in-memory", "hardware-aware", "hybrid", "analog", "AI acceleration"]
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10,<3.14"
@@ -35,6 +36,8 @@ hwa-plot-parasitic = "hwa_cim.plots:main_parasitic"
 hwa-maestro-pex = "hwa_cim.maestro_pex:main"
 hwa-surrogate-mc = "hwa_cim.surrogate_mc:main"
 hwa-plot-surrogate-mc = "hwa_cim.plots:main_surrogate_mc"
+hwa-plot-cadence-stress = "hwa_cim.plots:main_cadence_stress"
+hwa-plot-thesis-slides = "hwa_cim.thesis_slide_plots:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

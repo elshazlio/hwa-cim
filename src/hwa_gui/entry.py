@@ -1,4 +1,4 @@
-"""Console entry: `hwa-dashboard` → Streamlit HWA-CiM Lab. See `GUI_RUN.md` in the repo root."""
+"""Console entry: `hwa-dashboard` → SRAM HWA Lab. See `GUI_RUN.md` in the repo root."""
 
 from __future__ import annotations
 

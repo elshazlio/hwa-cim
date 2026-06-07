@@ -10,7 +10,7 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Compare · HWA-CiM Lab",
+    page_title="Compare · SRAM HWA Lab",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded",

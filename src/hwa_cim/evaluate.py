@@ -13,6 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from hwa_cim.c2c import c2c_mac
+from hwa_cim.cadence_stress import CadenceStressProfile, load_cadence_stress_profile
 from hwa_cim.data import get_mnist_loaders
 from hwa_cim.models import MicroMLP, NoisyMicroMLP
 from hwa_cim.quantization import quantize_uint4, symmetric_quantize_int4
@@ -114,6 +115,10 @@ def run_noisy_eval(
     seeds: int = 10,
     device: str = "cpu",
     out: Path | None = None,
+    *,
+    noise_mode: str = "synthetic",
+    surrogate_summary: Path | None = None,
+    stress_scale: float = 1.0,
 ) -> dict:
     """Phase 2 noisy inference on INT4-quantized-path baseline. Writes JSON and returns payload."""
     device_t = torch.device(device)
@@ -121,11 +126,24 @@ def run_noisy_eval(
     base = MicroMLP().to(device_t)
     ckpt = torch.load(checkpoint, map_location=device_t)
     base.load_state_dict(ckpt["model_state_dict"])
+
+    cadence_profile: CadenceStressProfile | None = None
+    surrogate_sigma_rel: float | None = None
+    if noise_mode == "cadence_stress":
+        if not surrogate_summary:
+            raise ValueError("surrogate_summary required when noise_mode is cadence_stress")
+        cadence_profile = load_cadence_stress_profile(
+            surrogate_summary, stress_scale=stress_scale
+        )
+        surrogate_sigma_rel = cadence_profile.surrogate_sigma_rel
+
     noisy = NoisyMicroMLP(
-        gamma=gamma,
+        gamma=gamma if noise_mode == "synthetic" else 0.0,
         alpha_clip=3.0,
         use_adc=True,
         adc_bits=4,
+        noise_mode=noise_mode,
+        surrogate_sigma_rel=surrogate_sigma_rel,
     ).to(device_t)
     copy_mlp_to_noisy(base, noisy)
     noisy.train()  # noise active
@@ -134,13 +152,16 @@ def run_noisy_eval(
         torch.manual_seed(seed)
         accs.append(accuracy(noisy, test_loader, device_t))
     mean, std = float(np.mean(accs)), float(np.std(accs))
-    out_d = {
+    out_d: dict = {
         "gamma": gamma,
         "seeds": seeds,
         "mean_accuracy": mean,
         "std_accuracy": std,
         "per_seed": accs,
+        "noise_mode": noise_mode,
     }
+    if cadence_profile is not None:
+        out_d.update(cadence_profile.metrics_fields())
     out_path = out or checkpoint.parent / "noisy_eval.json"
     save_json(out_path, out_d)
     print(json.dumps(out_d, indent=2))
@@ -186,6 +207,18 @@ def main_noisy() -> None:
     p.add_argument("--seeds", type=int, default=10)
     p.add_argument("--device", default="cpu")
     p.add_argument("--out", type=Path, default=None)
+    p.add_argument(
+        "--noise-mode",
+        choices=("synthetic", "cadence_stress"),
+        default="synthetic",
+    )
+    p.add_argument(
+        "--surrogate-summary",
+        type=Path,
+        default=None,
+        help="Phase 4.5 summary CSV for cadence_stress mode",
+    )
+    p.add_argument("--stress-scale", type=float, default=1.0)
     args = p.parse_args()
     run_noisy_eval(
         checkpoint=args.checkpoint,
@@ -194,6 +227,9 @@ def main_noisy() -> None:
         seeds=args.seeds,
         device=args.device,
         out=args.out,
+        noise_mode=args.noise_mode,
+        surrogate_summary=args.surrogate_summary,
+        stress_scale=args.stress_scale,
     )
 
 

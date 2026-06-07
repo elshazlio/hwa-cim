@@ -13,3 +13,10 @@ dist/
 build/
 results/.mplconfig/
 results/.dashboard_last.log
+
+# Agent / IDE workflow markdown (local only — not project docs)
+.cursor/plans/
+docs/superpowers/
+presentation_stuff/Mariam Stuff/hwa_slide_edit_report.md
+presentation_stuff/Mariam Stuff/hwa_slide_action_points.md
+presentation_stuff/thesis_2_slide_deck_proposed_outline.md

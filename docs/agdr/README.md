@@ -1,6 +1,6 @@
 # Agent Decision Records (AgDR)
 
-This directory holds **Agent Decision Records** for the Thesis HW Codesign / **hwa-cim** project—structured notes on meaningful technical choices so reviewers and future agents understand *why*, not only *what* changed.
+This directory holds **Agent Decision Records** for **hwa-cim** ([`elshazlio/hwa-cim`](https://github.com/elshazlio/hwa-cim), Python package **`hwa-cim`**)—structured notes on meaningful technical choices so reviewers and future agents understand *why*, not only *what* changed.
 
 - **Format & philosophy:** [Agent Decision Records (Me2resh)](https://www.me2resh.com/blog/agent-decision-records), [spec / examples on GitHub](https://github.com/me2resh/agent-decision-record).
 - **Cursor enforcement:** `.cursor/rules/agent-decision-records.mdc` (`alwaysApply: true`) reminds agents to add a record when decisions match the triggers there.
@@ -9,7 +9,7 @@ This directory holds **Agent Decision Records** for the Thesis HW Codesign / **h
 
 `AgDR-{NNNN}-{short-kebab-title}.md`
 
-Use four-digit zero-padded IDs. The next free number is **one higher than the largest existing `AgDR-NNNN`** (**0005** after AgDR-0004).
+Use four-digit zero-padded IDs. The next free number is **one higher than the largest existing `AgDR-NNNN`** (**0007** after AgDR-0006).
 
 ## Workflow
 
@@ -27,3 +27,5 @@ Use four-digit zero-padded IDs. The next free number is **one higher than the la
 | [AgDR-0003](AgDR-0003-yaml-calibration-and-csv-noise.md) | YAML MAC calibration and richer CSV noise | executed |
 | [AgDR-0004](AgDR-0004-maestro-pex-calibration-path.md) | Maestro PEX calibration path separate from MC CSV | executed |
 | [AgDR-0005](AgDR-0005-surrogate-monte-carlo-profile-mode.md) | Phase 4.5 surrogate MC (user-defined Gaussian parametric variation) | executed |
+| [AgDR-0006](AgDR-0006-guided-wizard-default-navigation.md) | Guided wizard as default Streamlit navigation | executed |
+| [AgDR-0007](AgDR-0007-cadence-informed-surrogate-stress.md) | Cadence-informed surrogate stress training mode | executed |

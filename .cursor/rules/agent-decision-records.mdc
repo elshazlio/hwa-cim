@@ -1,5 +1,5 @@
 ---
-description: Agent Decision Records (AgDR) — document significant technical choices for this thesis / hwa-cim repo
+description: Agent Decision Records (AgDR) — document significant technical choices for sram-hwa-hybrid-ai / hwa-cim
 alwaysApply: true
 ---
 
@@ -31,6 +31,6 @@ Fill **Context**, **Options Considered** (table), **Decision**, **Consequences**
 
 ## Project scope hint
 
-**hwa-cim** is a hardware-aware training pipeline for a C-2C SRAM compute-in-memory macro (MNIST micro-MLP, Phases 1–5). Decisions that affect comparability of thesis numbers or the hardware–software boundary belong in AgDR.
+**sram-hwa-hybrid-ai** (`hwa-cim` on PyPI/pip) is a hardware-aware training pipeline for hybrid (analog + digital) SRAM AI acceleration—a C-2C compute-in-memory macro (MNIST micro-MLP, Phases 1–5). Decisions that affect comparability of thesis numbers or the hardware–software boundary belong in AgDR.
 
 Do **not** edit the plan file in `.cursor/plans/` when documenting decisions — copy the substance into `docs/agdr/` if it was a real decision.

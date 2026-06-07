@@ -1,8 +1,29 @@
-# HWA-CiM Lab — Streamlit dashboard
+# SRAM HWA Lab — Streamlit dashboard
 
-The **`hwa-dashboard`** command opens the **HWA-CiM Lab**: a Streamlit UI around the same training, evaluation, and plotting entrypoints as the CLI. Use it to **launch jobs**, **tail logs**, **browse `results/`**, **compare `metrics.json`**, preview **Plotly** charts, and **validate Phase 5 noise CSVs**—especially useful for demos and sanity checks. Nothing replaces the CLI for scripting; the GUI is optional.
+**Repo:** [`hwa-cim`](https://github.com/elshazlio/hwa-cim) · **Package:** `hwa-cim`
 
-**Multipage layout:** sidebar labels (**Home**, **Run**, **Results**, …) come from **`st.navigation` / `st.Page`** in `src/hwa_gui/Home.py`, not from a `[pages]` table in `config.toml` (Streamlit does not support that). See **`docs/agdr/AgDR-0002-streamlit-navigation-and-sidebar-labels.md`**. Optional `[gui]` installs **Streamlit ≥ 1.52**.
+The **`hwa-dashboard`** command opens the **SRAM HWA Lab**: a Streamlit UI for hybrid (analog + digital) SRAM hardware-aware training—the same phases as the CLI.
+
+## Start here: Guided demo (default)
+
+The sidebar opens **Guided demo** — a six-step walkthrough for colleagues and thesis demos:
+
+| Step | What you do |
+| ---- | ----------- |
+| **Intro** | 30-second CiM + HWA story → **Start demo** |
+| **1 · Baseline** | Load or train Phase 1 (`results/run_baseline/`) |
+| **2 · Hardware** | Pick profile: Synthetic, Maestro PEX, **Phase 4.5 Surrogate MC**, corners; Phase 5 shown as **future work** |
+| **3 · Noise crash** | Noisy eval on baseline (γ=0.02) |
+| **4 · HWA recovery** | Train/load HWA with the Step 2 profile |
+| **5 · Thesis proof** | Three-bar chart + safe/unsafe claims |
+
+**Quick demo** loads existing `results/` artifacts. **Live demo** runs training jobs (one at a time, same as Advanced **Run**).
+
+**Advanced lab** (second sidebar group) keeps the full console: **Run**, **Results**, **Compare**, **Charts**, **Hardware profiles**.
+
+**Thesis slide figures:** In **Charts → Thesis slide figures (deck)** or wizard Steps 2/5, click **Generate thesis slide figures**, or run `hwa-plot-thesis-slides`. Outputs land in `results/plots/04_thesis_slides/`.
+
+Navigation is defined in **`src/hwa_gui/Home.py`** (`st.navigation` groups). See **`docs/agdr/AgDR-0006-guided-wizard-default-navigation.md`**. Optional `[gui]` installs **Streamlit ≥ 1.52**.
 
 **Use your real clone path** (folder that contains `pyproject.toml`).  
 If `cd` fails, do not run `pip install` from `~` — you may see `file:///Users/... does not appear to be a Python project`.
@@ -14,7 +35,7 @@ If `cd` fails, do not run `pip install` from `~` — you may see `file:///Users/
 Recommended (tests + dashboard):
 
 ```bash
-cd "$HOME/Documents/My Projects/Thesis HW Codesign"
+cd "$HOME/Documents/My Projects/hwa-cim"
 ls pyproject.toml
 python3.12 -m venv .venv
 source .venv/bin/activate
@@ -32,7 +53,7 @@ pip install -e ".[gui]"
 On **Windows** (PowerShell):
 
 ```powershell
-cd "C:\Users\YOURNAME\Documents\Thesis HW Codesign"
+cd "C:\Users\YOURNAME\Documents\hwa-cim"
 Get-Item pyproject.toml
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -44,7 +65,7 @@ pip install -e ".[dev,gui]"
 **macOS / Linux:**
 
 ```bash
-cd "$HOME/Documents/My Projects/Thesis HW Codesign"
+cd "$HOME/Documents/My Projects/hwa-cim"
 source .venv/bin/activate
 hwa-dashboard
 ```
@@ -52,12 +73,12 @@ hwa-dashboard
 **Windows (PowerShell):**
 
 ```powershell
-cd "C:\Users\YOURNAME\Documents\Thesis HW Codesign"
+cd "C:\Users\YOURNAME\Documents\hwa-cim"
 .\.venv\Scripts\Activate.ps1
 hwa-dashboard
 ```
 
-Streamlit prints a local URL (usually `http://localhost:8501`).
+Your default browser opens automatically when the server is ready (usually `http://localhost:8501`). The URL is also printed in the terminal.
 
 **Equivalent** (from repo root, venv active, same working directory behavior as `hwa-dashboard`):
 
@@ -69,11 +90,10 @@ python -m streamlit run src/hwa_gui/Home.py
 
 ---
 
-## What each page does
+## What each Advanced lab page does
 
 | Page | Role |
 | ---- | ---- |
-| **Home** | Short orientation, “where to start”, phase table, link to **AgDR-0001** for INT4 metric keys, health strip. |
 | **Run** | Tabs in thesis order: baseline → noisy eval / Γ sweep → HWA train / HWA sweep → distill → thesis PNG → parasitic PNG. Each tab has an expander (“what this does / what you need”). |
 | **Results** | Pick a `metrics.json`; list checkpoints, CSVs, JSON, PNGs under `results/`. |
 | **Compare** | Multi-select `metrics.json` files → one table (good for Phase 1 vs Phase 3). |
@@ -112,7 +132,7 @@ Phase 1 **`metrics.json`** includes **`int4_ptq_test_accuracy_ideal`** and **`in
 If `.venv` exists and dependencies are installed:
 
 ```bash
-cd "$HOME/Documents/My Projects/Thesis HW Codesign"
+cd "$HOME/Documents/My Projects/hwa-cim"
 source .venv/bin/activate
 hwa-dashboard
 ```

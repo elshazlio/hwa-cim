@@ -1,0 +1,109 @@
+`include "discipline.h"
+`include "constants.h"
+
+module res_va(p,n);
+inout p,n;
+electrical p,n;
+
+parameter real rend=1;
+parameter real rs=1;
+parameter real dw=1;
+parameter real vcr1=1;
+parameter real vcr2=1;
+parameter real tc1=1;
+parameter real tc2=1;
+parameter real (*integer inherited_mfactor;*)m=1;
+parameter real res_type=1;
+parameter real l=1;
+parameter real w=1;
+parameter real temper=25;
+
+
+
+
+real res,tcoef,vl,i,v,power;
+
+analog begin
+
+res=0;
+
+ 
+if (res_type==1) begin//*****for non salicide diffusion type resistor 
+
+tcoef=1.0+(tc1*(temper-25))+(tc2 *(temper-25)*(temper-25)); 
+res=(2*rend+rs*l)/(w+dw)*(1.0+vcr1*abs(V(p, n))+vcr2*pow(abs(V(p, n)),2))*tcoef/m;
+end 
+
+if (res_type==2) begin//*****for non salicide poly type resistor 
+
+tcoef=1.0+(tc1*(temper-25))+(tc2 *(temper-25)*(temper-25)); 
+res=(2*rend+rs*l)/(w+dw)*(1.0+vcr1*abs(V(p, n))/l+vcr2*pow(abs(V(p, n))/l,2))*tcoef/m;
+end 
+
+if (res_type==3) begin//*****for hr type resistor 
+
+tcoef=1.0+(tc1*(temper-25))+(tc2 *(temper-25)*(temper-25));
+res=(2*rend+rs*(l-0.76e-06))/(w+dw)*(1.0+vcr1*abs(V(p, n))/l+vcr2*pow(abs(V(p, n))/l,2))*tcoef/m;
+end
+
+if (res_type==4) begin//*****for salicide diffusion type resistor 
+
+tcoef=1.0+(tc1*(temper-25)); 
+res=rs*l/(w+dw)*(1.0+vcr1*abs(V(p, n))+vcr2*pow(abs(V(p, n)),2))*tcoef/m ;
+end
+
+if (res_type==5) begin//*****for salicide poly type resistor 
+
+tcoef=1.0+(tc1*(temper-25)); 
+res=rs*l/(w+dw)*(1.0+vcr1*abs(V(p, n))/l+vcr2*pow(abs(V(p, n))/l,2))*tcoef/m;
+end
+
+if (res_type==6) begin//*****for n-well type resistor 
+
+tcoef=1.0+(tc1*(temper-25))+(tc2 *(temper-25)*(temper-25)); 
+res=rs*l/(w+dw)*tcoef ;
+end
+
+if (res_type==7) begin//*****for m1 metal type resistor 
+
+res=0.128*w/(w-0.02e-06)*l/w ; 
+end
+
+if (res_type==8) begin//*****for 1x metal type resistor 
+
+res=0.0888*w/(w-0.05e-06)*l/w ; 
+end
+
+if (res_type==9) begin//*****for 2x metal type resistor 
+
+res=0.062*w/(w+0.024e-06)*l/w ; 
+end
+
+if (res_type==10) begin//*****for 4x metal type resistor 
+
+res=0.027*l/w; 
+end
+
+if (res_type==11) begin//*****for 6x metal type resistor 
+
+res=0.017*l/w ; 
+end
+
+
+if (res<1e-20) begin
+	res=1e-20;
+	$strobe("WARNING : The resistance value in \"%m\" is clamped to 1e-20");
+end
+
+
+//$strobe(r);
+
+I(p, n) <+ V(p, n)/res;
+
+v=V(p,n);
+i=v/res;
+power=i*v;
+I(p,n) <+ white_noise(4*1.38e-23*(temper+273)/res, "thermal");
+end
+
+endmodule

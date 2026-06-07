@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+from hwa_cim.cadence_stress import CadenceStressProfile, load_cadence_stress_profile
 from hwa_cim.config import load_mac_calibration
 from hwa_cim.maestro_pex import hardware_profile_metrics_extra
 from hwa_cim.data import get_mnist_loaders
@@ -73,6 +74,8 @@ def run_hwa_train(
     device: str = "cpu",
     noise_mode: str = "synthetic",
     noise_profile: Path | None = None,
+    surrogate_summary: Path | None = None,
+    stress_scale: float = 1.0,
     calibration_yaml: Path | None = None,
     eval_noisy_seeds: int = 10,
     hardware_aware: bool = True,
@@ -84,7 +87,17 @@ def run_hwa_train(
     mac = load_mac_calibration(calibration_yaml)
     sigma_global = None
     profile_obj: NoiseProfileCSV | None = None
-    if noise_mode == "csv":
+    cadence_profile: CadenceStressProfile | None = None
+    surrogate_sigma_rel: float | None = None
+
+    if noise_mode == "cadence_stress":
+        if not surrogate_summary:
+            raise ValueError("--surrogate-summary required when noise_mode is cadence_stress")
+        cadence_profile = load_cadence_stress_profile(
+            surrogate_summary, stress_scale=stress_scale
+        )
+        surrogate_sigma_rel = cadence_profile.surrogate_sigma_rel
+    elif noise_mode == "csv":
         if not noise_profile:
             raise ValueError("--noise-profile required when noise_mode is csv")
         profile_obj = NoiseProfileCSV.load(noise_profile)
@@ -102,6 +115,7 @@ def run_hwa_train(
         noise_mode=noise_mode,
         sigma_global=sigma_global,
         noise_profile=profile_obj,
+        surrogate_sigma_rel=surrogate_sigma_rel,
         hardware_aware=hardware_aware,
         **mac.noisy_layer_kwargs(),
     ).to(dev)
@@ -133,7 +147,9 @@ def run_hwa_train(
 
     profile_mode = hardware_profile_mode
     if profile_mode is None:
-        if noise_mode == "csv":
+        if noise_mode == "cadence_stress":
+            profile_mode = "cadence_surrogate_stress"
+        elif noise_mode == "csv":
             profile_mode = "monte_carlo_csv"
         elif calibration_yaml and "calibration_pex" in str(calibration_yaml):
             profile_mode = "maestro_pex"
@@ -153,6 +169,8 @@ def run_hwa_train(
         "mac_calibration": mac.c2c_kwargs(),
         **hardware_profile_metrics_extra(profile_mode),
     }
+    if cadence_profile is not None:
+        metrics.update(cadence_profile.metrics_fields())
     save_json(out_dir / "metrics.json", metrics)
     save_checkpoint(out_dir / "best.pt", model, extra={"metrics": metrics, "phase": 3})
     print(json.dumps(metrics, indent=2))
@@ -226,8 +244,24 @@ def main() -> None:
     ap.add_argument("--alpha", type=float, default=3.0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--device", default="cpu")
-    ap.add_argument("--noise-mode", choices=("synthetic", "csv"), default="synthetic")
+    ap.add_argument(
+        "--noise-mode",
+        choices=("synthetic", "csv", "cadence_stress"),
+        default="synthetic",
+    )
     ap.add_argument("--noise-profile", type=Path, default=None)
+    ap.add_argument(
+        "--surrogate-summary",
+        type=Path,
+        default=None,
+        help="Phase 4.5 surrogate_mc_summary.csv for cadence_stress mode",
+    )
+    ap.add_argument(
+        "--stress-scale",
+        type=float,
+        default=1.0,
+        help="Multiplier on surrogate_sigma_rel (cadence_stress only)",
+    )
     ap.add_argument(
         "--calibration-yaml",
         type=Path,
@@ -247,6 +281,7 @@ def main() -> None:
             "maestro_pex",
             "pex_corner_proxy",
             "surrogate_mc",
+            "cadence_surrogate_stress",
             "monte_carlo_csv",
         ),
         default=None,
@@ -265,6 +300,8 @@ def main() -> None:
         device=args.device,
         noise_mode=args.noise_mode,
         noise_profile=args.noise_profile,
+        surrogate_summary=args.surrogate_summary,
+        stress_scale=args.stress_scale,
         calibration_yaml=args.calibration_yaml,
         eval_noisy_seeds=args.eval_noisy_seeds,
         hardware_aware=not args.no_hardware_aware,

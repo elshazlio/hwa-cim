@@ -7,6 +7,7 @@ from pathlib import Path
 import streamlit as st
 
 from hwa_cim.maestro_pex import HARDWARE_PROFILES, HardwareProfileInfo
+from hwa_gui.branding import LAB_NAME, REPO_TAGLINE
 from hwa_gui.paths import project_root
 
 
@@ -64,10 +65,15 @@ def render_pipeline_sidebar(*, current: str | None = None) -> None:
     """Sidebar: lab blurb, resume checklist, suggested next (built-in nav holds page names)."""
     art = default_pipeline_artifacts()
     with st.sidebar:
-        st.markdown("### HWA-CiM Lab")
+        st.markdown(f"### {LAB_NAME}")
+        st.caption(REPO_TAGLINE)
         st.caption(
             "Train and evaluate a tiny MNIST MLP shaped for a **C-2C SRAM** compute-in-memory "
-            "story—noisy eval, hardware-aware training, and thesis figures."
+            "macro—noisy eval, hardware-aware training, and thesis figures."
+        )
+        st.caption(
+            "New users: follow **Guided demo** (Intro → Step 5). "
+            "**Advanced lab** has the full Run console."
         )
         st.caption("Switch pages with the **navigation** menu at the top of the sidebar.")
         if current:
@@ -113,7 +119,9 @@ def health_banner() -> None:
 
 
 def hardware_profile_info(mode: str) -> HardwareProfileInfo:
-    return HARDWARE_PROFILES.get(mode, HARDWARE_PROFILES["synthetic"])
+    if mode in HARDWARE_PROFILES:
+        return HARDWARE_PROFILES[mode]
+    return HARDWARE_PROFILES["synthetic"]
 
 
 def render_hardware_profile_banner(mode: str) -> None:
@@ -134,14 +142,22 @@ def hardware_profile_badge_from_metrics(metrics: dict) -> str:
     return HARDWARE_PROFILES["synthetic"].badge
 
 
+def overwrite_confirm_key(out_dir: Path) -> str:
+    """Stable Streamlit widget key for an output directory."""
+    return f"confirm_overwrite_{out_dir.resolve()}"
+
+
+def output_dir_needs_overwrite_confirm(out_dir: Path) -> bool:
+    """True when writing to *out_dir* should require explicit user confirmation."""
+    return out_dir.exists() and any(out_dir.iterdir())
+
+
 def confirm_overwrite(out_dir: Path) -> bool:
     """Return True if safe to write, or user confirmed overwrite."""
-    if not out_dir.exists():
+    if not output_dir_needs_overwrite_confirm(out_dir):
         return True
-    if any(out_dir.iterdir()):
-        return st.checkbox(
-            f"Output directory `{out_dir}` is not empty. Overwrite / add files anyway?",
-            value=False,
-            key=f"confirm_{hash(str(out_dir))}",
-        )
-    return True
+    return st.checkbox(
+        f"Output directory `{out_dir}` is not empty. Overwrite / add files anyway?",
+        value=False,
+        key=overwrite_confirm_key(out_dir),
+    )

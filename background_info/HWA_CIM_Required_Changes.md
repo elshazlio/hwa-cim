@@ -1,7 +1,7 @@
 # HWA-CIM Repository — Required Changes Per Verification Roadmap
 
 **Companion to:** `CIM_SRAM_Verification_Software_Roadmap.md`  
-**Target repository:** `github.com/elshazlio/hwa-cim`  
+**Target repository:** [`github.com/elshazlio/hwa-cim`](https://github.com/elshazlio/hwa-cim) (Python package: `hwa-cim`)  
 **Repository scope (current):** HWA training pipeline (Phases 1–5 of AFM methodology)  
 **Document version:** 1.0  
 **Last updated:** 2026-05-11  

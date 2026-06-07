@@ -1,0 +1,31 @@
+{
+  "gamma": 0.02,
+  "seeds": 10,
+  "mean_accuracy": 0.9389,
+  "std_accuracy": 0.0,
+  "per_seed": [
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389,
+    0.9389
+  ],
+  "noise_mode": "cadence_stress",
+  "surrogate_summary": "/Users/elshazlio/Documents/My Projects/sram-hwa-hybrid-ai/results/surrogate_mc/cap_sweep/surrogate_mc_summary.csv",
+  "surrogate_marker": "mom_cap_grid",
+  "surrogate_variable_group": "mom_cap_grid",
+  "mean_output": 0.7550156532957976,
+  "sigma_output": 0.0097154801568609,
+  "spread_output": 0.0238055500599716,
+  "surrogate_sigma_rel": 0.012867918849696486,
+  "stress_scale": 1.0,
+  "phase_label": "Phase 4.5",
+  "profile_kind": "cadence_informed_surrogate_stress",
+  "profile_is_foundry_certified": false,
+  "profile_warning": "Surrogate MC with user-defined Gaussian parametric variation; not UMC-certified Monte Carlo"
+}

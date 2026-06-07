@@ -12,7 +12,7 @@ from pathlib import Path
 import streamlit as st
 
 st.set_page_config(
-    page_title="Charts · HWA-CiM Lab",
+    page_title="Charts · SRAM HWA Lab",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -35,6 +35,7 @@ st.info(
 kind = st.selectbox(
     "Chart type",
     [
+        "Thesis slide figures (deck)",
         "Parasitic sweep",
         "Gamma sweep (CSV)",
         "HWA sweep (CSV)",
@@ -45,6 +46,12 @@ kind = st.selectbox(
     ],
     index=0,
 )
+
+if kind == "Thesis slide figures (deck)":
+    from hwa_gui.thesis_slides import render_thesis_slide_gallery
+
+    render_thesis_slide_gallery(show_generate_button=True)
+    st.stop()
 
 if kind == "Parasitic sweep":
     from hwa_gui.plotly_charts import figure_parasitic_sweep
