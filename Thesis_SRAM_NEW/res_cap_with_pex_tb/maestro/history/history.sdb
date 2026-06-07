@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<setupdb version="7">history
+	<active>Active Setup</active>
+	<history>History
+		<historyentry assemblerOrExplorer="explorer" roOrView="view" runningOrFinished="finished">ExplorerRun.0
+			<timestamp>May 18 20:36:28 2026</timestamp>
+			<uuid>{718d0dad-ba17-443b-9147-38f0c3d6af6d}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/res_cap_with_pex_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/res_cap_with_pex_tb/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/res_cap_with_pex_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/res_cap_with_pex_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+	</history>
+</setupdb>

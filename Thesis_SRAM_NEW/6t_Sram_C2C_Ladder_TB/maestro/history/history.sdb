@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<setupdb version="7">history
+	<active>Active Setup</active>
+	<history>History
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.0
+			<timestamp>May 19 15:22:07 2026</timestamp>
+			<uuid>{1945a8ff-e65d-4edc-900c-0263baed8cd8}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.1
+			<timestamp>May 19 15:23:26 2026</timestamp>
+			<uuid>{e6fddd07-6d2e-4ebe-b68f-3624524d14c8}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.2
+			<timestamp>May 19 15:23:57 2026</timestamp>
+			<uuid>{da987a9b-f9b4-48bf-aef3-28c3c4b76dfa}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.3
+			<timestamp>May 19 15:30:13 2026</timestamp>
+			<uuid>{3dbc2218-cb0e-47d3-8708-f674f086cf51}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="explorer" roOrView="view" runningOrFinished="finished">ExplorerRun.0
+			<timestamp>May 20 15:12:30 2026</timestamp>
+			<uuid>{149c8643-5b0b-40a8-8c47-cb93851d827f}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+	</history>
+</setupdb>

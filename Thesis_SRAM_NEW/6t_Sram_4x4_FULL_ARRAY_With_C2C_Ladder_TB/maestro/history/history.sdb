@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<setupdb version="7">history
+	<active>Active Setup</active>
+	<history>History
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.0
+			<timestamp>May 21 14:50:58 2026</timestamp>
+			<uuid>{ed01b294-d7c1-40f5-9ecd-a338a35f2fcd}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/home/vlsi/simulation/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.1
+			<timestamp>May 21 14:53:33 2026</timestamp>
+			<uuid>{1e90b0bd-5b1e-474a-b5db-3990ad590fea}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultspsfisuserpath>1</resultspsfisuserpath>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/eda/Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>./../../../../../../../Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="explorer" roOrView="view" runningOrFinished="finished">ExplorerRun.0
+			<timestamp>May 21 17:13:47 2026</timestamp>
+			<uuid>{703cab3c-73cf-4990-8879-8b3bb54b4d97}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultspsfisuserpath>1</resultspsfisuserpath>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/eda/Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>./../../../../../../../Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.2
+			<timestamp>May 21 17:15:32 2026</timestamp>
+			<uuid>{b10e5252-d97b-4b57-800c-da88178f5970}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultspsfisuserpath>1</resultspsfisuserpath>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/eda/Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>./../../../../../../../Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.3
+			<timestamp>May 21 17:16:16 2026</timestamp>
+			<uuid>{c85e4663-20ff-4346-b9f8-4aff96acc7e1}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultspsfisuserpath>1</resultspsfisuserpath>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/eda/Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>./../../../../../../../Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.4
+			<timestamp>May 21 17:27:44 2026</timestamp>
+			<uuid>{5f696858-46c6-4ce8-8d0c-d6ec019b77b9}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultspsfisuserpath>1</resultspsfisuserpath>
+			<resultsname>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<runlog>/eda/cadence/Thesis_SRAM_NEW/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME.log</runlog>
+			<runlogfile>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.log</runlogfile>
+			<psfdir>/eda/Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>./../../../../../../../Shazli_simulations/Thesis_SRAM_NEW/6t_Sram_4x4_FULL_ARRAY_With_C2C_Ladder_TB/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+		</historyentry>
+	</history>
+</setupdb>
