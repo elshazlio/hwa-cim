@@ -1,0 +1,16 @@
+Starting Single Run, Sweeps and Corners...
+
+Current time: Tue Apr  7 14:48:23 2026 
+Best design point: 1
+Design specs: 
+	ADC_ONLY_THESIS_Inverter_1	corner	Nominal - 
+	tphl		39.21p
+	tplh		38.06p
+	TP		38.64p
+Design parameters: 
+
+ExplorerRun.0
+Number of points completed: 1
+Number of simulation errors: 0
+ExplorerRun.0 completed. 
+Current time: Tue Apr  7 14:48:30 2026 

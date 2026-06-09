@@ -1,0 +1,16 @@
+Starting Single Run, Sweeps and Corners...
+
+Current time: Tue Apr  1 16:20:38 2025 
+Best design point: 1
+Design specs: 
+	HAJO_OR_static_v1_1	corner	Nominal - 
+	tphl		90.81p
+	tplh		106.2p
+	tp		98.51p
+Design parameters: 
+
+ExplorerRun.0
+Number of points completed: 1
+Number of simulation errors: 0
+ExplorerRun.0 completed. 
+Current time: Tue Apr  1 16:20:44 2025 

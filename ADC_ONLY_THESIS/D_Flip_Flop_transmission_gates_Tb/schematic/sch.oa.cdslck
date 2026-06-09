@@ -1,0 +1,16 @@
+#
+# Edit Lock-Stake file. CAUTION: Please do not change.
+#
+# Information about current Edit Lock Owner.
+#
+LockStakeVersion               1.1
+LoginName                      abanoubemad@auc.egy
+HostName                       ELC-P07-2093L11
+ProcessIdentifier              8024
+ProcessCreationTime_UTC        1776940620
+ProcessCreationTime_Readable   Thu Apr 23 12:37:00 2026 EET
+AppIdentifier                  OA File System Design Manager
+OSType                         unix
+ReasonForPlacingEditLock       OpenAccess edit lock
+FilePathUsedToEditLock         /home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/D_Flip_Flop_transmission_gates_Tb/schematic/sch.oa.cdslck
+TimeEditLocked                 Thu Apr 23 13:49:15 2026 EET
