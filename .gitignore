@@ -20,3 +20,9 @@ docs/superpowers/
 presentation_stuff/Mariam Stuff/hwa_slide_edit_report.md
 presentation_stuff/Mariam Stuff/hwa_slide_action_points.md
 presentation_stuff/thesis_2_slide_deck_proposed_outline.md
+
+# background_info: local reference only (Analog foundation models paper stays in repo)
+background_info/*
+!background_info/Analog_foundation_models_methodology_paper/
+background_info/Analog_foundation_models_methodology_paper/*
+!background_info/Analog_foundation_models_methodology_paper/Analog_foundation_models.pdf
