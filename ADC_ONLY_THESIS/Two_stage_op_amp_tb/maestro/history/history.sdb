@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<setupdb version="7">history
+	<active>Active Setup</active>
+	<history>History
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.37
+			<timestamp>Apr 22 17:19:38 2026</timestamp>
+			<uuid>{1577db1a-723d-4dcf-be05-ada5bdf761e7}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.38
+			<timestamp>Apr 22 17:21:14 2026</timestamp>
+			<uuid>{cdfa258a-c580-4bcf-82e0-fdd58794af61}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.39
+			<timestamp>Apr 22 17:22:36 2026</timestamp>
+			<uuid>{c3a5ffc4-cfb0-4ce5-aa91-ce860fee3ce9}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.40
+			<timestamp>Apr 22 17:26:25 2026</timestamp>
+			<uuid>{decce9bc-21ea-4b24-92f5-3e571b9619ed}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.41
+			<timestamp>Apr 22 17:27:20 2026</timestamp>
+			<uuid>{97ec9832-a912-4df6-898b-bbbfd34ddbb4}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.42
+			<timestamp>Apr 22 17:28:16 2026</timestamp>
+			<uuid>{76e503aa-5691-4f72-9db2-c312ab23b5c1}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.43
+			<timestamp>Apr 22 17:28:42 2026</timestamp>
+			<uuid>{9cc0482e-fda2-4169-b04c-f9cf7ddb4716}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.44
+			<timestamp>Apr 22 17:29:12 2026</timestamp>
+			<uuid>{12c6639c-d00e-4df9-a9db-0fc31db7fc8f}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.45
+			<timestamp>Apr 22 17:30:00 2026</timestamp>
+			<uuid>{e60bcfc7-7915-4282-a825-bb91105bdd9b}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+		<historyentry assemblerOrExplorer="assembler" roOrView="view" runningOrFinished="finished">Interactive.46
+			<timestamp>Apr 22 17:31:21 2026</timestamp>
+			<uuid>{75340fda-2486-4f6c-a8ae-f9efc3620ed0}</uuid>
+			<locked>0</locked>
+			<mode>Single Run, Sweeps and Corners</mode>
+			<resultsname>/home/abanoubemad@auc.egy/cadence/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME.rdb</resultsname>
+			<simresults>$AXL_SETUPDB_DIR/results/maestro/$AXL_HISTORY_NAME.rdb</simresults>
+			<psfdir>/home/abanoubemad@auc.egy/simulation/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</psfdir>
+			<simdir>$AXL_PROJECT_DIR/ADC_ONLY_THESIS/Two_stage_op_amp_tb/maestro/results/maestro/$AXL_HISTORY_NAME</simdir>
+			<historyPsfSize>Not Computed</historyPsfSize>
+		</historyentry>
+	</history>
+</setupdb>

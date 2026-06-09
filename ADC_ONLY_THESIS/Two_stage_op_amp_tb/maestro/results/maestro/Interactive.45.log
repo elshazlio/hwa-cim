@@ -1,0 +1,15 @@
+Starting Single Run, Sweeps and Corners...
+
+Current time: Wed Apr 22 17:30:00 2026 
+Best design point: 1
+Design specs: 
+	ADC_ONLY_THESIS_Two_stage_op_amp_tb_1	corner	Nominal - 
+	Phase Margin		45.61
+	gainBwProd(db20(getData("/LG" ?result "stb")))		922M
+Design parameters: 
+
+Interactive.45
+Number of points completed: 21
+Number of simulation errors: 0
+Interactive.45 completed. 
+Current time: Wed Apr 22 17:30:51 2026 
