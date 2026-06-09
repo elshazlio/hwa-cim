@@ -314,7 +314,7 @@ pytest
 Several colleagues outside the thesis group contributed materially to this work:
 
 - **Eng. Mostafa** — SRAM validation and bring-up support that grounded the hardware track in measured behavior.
-- **Zainelabideen** — layout guidance and analog floorplanning that kept the UMC 65 nm SRAM CiM macro on a credible path to tape-out.
+- **Eng. Omar Zainelabideen** — layout guidance and analog floorplanning that kept the UMC 65 nm SRAM CiM macro on a credible path to tape-out.
 
 Thank you both for the time, reviews, and practical help when the thesis team needed it most.
 
